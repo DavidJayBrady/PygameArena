@@ -80,6 +80,7 @@ class GameState:
         self.monsters = Monster.spawn_monsters(self.character, self.walls, ((ChampionMeleeMonster, 10), (Monster, 20),
                                                                             (RangeMonster, 20)))
 
+
         self.ability_manager = AbilityManager()
 
         # So we can call each monster's attack method.

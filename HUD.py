@@ -1,7 +1,7 @@
 import pygame
 from pygame.locals import *
 
-import Sword
+import Sword as S
 
 class Bar:
     def __init__(self, offset, uses_caps, type: str):
@@ -74,22 +74,25 @@ class AbilityManager:
         firestorm_image = load_and_scale('Other Art/Fireball.png')
         firestorm_image.set_colorkey((0, 0 , 0))
 
-        self.ability_images = {Sword.ToughenUp: toughen_image, Sword.Attack: attack_image,
-                               Sword.Sweep: sweep_image, Sword.Arrow: arrow_image,
-                               Sword.SplitShot: splitshot_image, Sword.Lightning: lightning_image,
-                               Sword.FireStorm: firestorm_image}
+        self.ability_images = {S.ToughenUp: toughen_image, S.Attack: attack_image,
+                               S.Sweep: sweep_image, S.Arrow: arrow_image,
+                               S.SplitShot: splitshot_image, S.Lightning: lightning_image,
+                               S.FireStorm: firestorm_image}
+
+        self.ability_names = {S.ToughenUp: "Toughen Up", S.Attack: "Strike", S.Sweep: "Sweep", S.Arrow: 'SingleShot',
+                              S.SplitShot: "Splitshot", S.Lightning: "Lightning", S.FireStorm: "FireStorm"}
 
         self.ability_points = 11
 
         # Used to draw the ability menu popup. Position is determined by menu_rects. 1 is bottom left, 2 is right of 1.
-        self.ability_list = [Sword.Attack, Sword.Sweep, Sword.Arrow, Sword.SplitShot,
-                             Sword.Lightning, Sword.FireStorm, Sword.ToughenUp, None, None, None, None, None]
+        self.ability_list = [S.Attack, S.Sweep, S.Arrow, S.SplitShot,
+                             S.Lightning, S.FireStorm, S.ToughenUp, None, None, None, None, None]
 
         # Controls what spell goes on which hotkey, and the image that shows up.
-        self.ability_hotkeys = {0: Sword.Attack, 1: Sword.Sweep, 2: Sword.Arrow, 3: Sword.SplitShot}
+        self.ability_hotkeys = {0: S.Attack, 1: S.Sweep, 2: S.Arrow, 3: S.SplitShot}
 
         # Default starting ability.
-        self.ability = Sword.Attack
+        self.ability = S.Attack
 
         # Use these to detect click and house hovering. Do not change.
         self.ability_rect_list = [Rect(40 + (x*90), 650, 80, 80) for x in range(4)]
@@ -114,14 +117,16 @@ class AbilityManager:
     def draw(self, screen):
         if self.menu_up:
             self._highlight_scrolled_over_ability(screen, self.menu_rects)
-            self._draw_abilities(screen, self.ability_menu_background_image, self.ability_menu_background_rect, self.ability_list, self.menu_rects)
+            self._draw_abilities(screen, self.ability_menu_background_image,
+                                 self.ability_menu_background_rect, self.ability_list, self.menu_rects)
 
         if self.ability_points > 0:
             screen.blit(self.font.render(str(self.ability_points) +' ability point to spend', True, (50, 150, 150)),[50, 140])
 
         self._highlight_scrolled_over_ability(screen, self.ability_rect_list)
 
-        self._draw_abilities(screen, self.ability_menu_background_image, self.ability_background_rect, self.ability_hotkeys, self.ability_rect_list)
+        self._draw_abilities(screen, self.ability_menu_background_image, self.ability_background_rect,
+                             self.ability_hotkeys, self.ability_rect_list)
 
         self._draw_hotkey_details(screen)
 
@@ -175,6 +180,7 @@ class AbilityManager:
         position = Rect(30, 540, 300, 50) if not self.menu_up else Rect(30, 260, 300, 50)
         screen.blit(self.ability_background_image, position)
 
-       # ability_name = self.font.render(self.ability_list[index], True, (150, 150, 100))
-       # text_pos =
+        ability_name = self.font.render(self.ability_names[self.ability_list[index]], True, (80, 200, 120))
+        text_pos = list(map(lambda x, y: x + y, position ,[10, 10]))
+        screen.blit(ability_name, text_pos)
 
