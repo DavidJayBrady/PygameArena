@@ -8,12 +8,14 @@ from math import degrees
 from random import randrange
 from collections import namedtuple
 
-AbilityStatistics = namedtuple('AbilityStatistics', 'name damage energy_consume cooldown ability_type ability_text_color')
+AbilityStatistics = namedtuple('AbilityStatistics', 'name damage energy_consume cooldown ability_type name_color')
 
 # If you get add_internal error, make sure you inherit from pygame.sprite.Sprite
 
-global MELEE_COLOR
-MELEE_COLOR = (220, 20, 20)
+MELEE_COLOR = (220, 20, 60)
+RANGE_COLOR = (20, 200, 60)
+MAGIC_COLOR = (20, 20, 220)
+PASSIVE_COLOR = (200, 150, 100)
 
 class Ability(pygame.sprite.Sprite):
     def __init__(self):
@@ -26,13 +28,15 @@ class Ability(pygame.sprite.Sprite):
         energy_consume = type.calc_energy_consume(ability_level, True)
         cooldown = type.calc_cooldown(ability_level, True)
         ability_type = type.ability_type
-        return AbilityStatistics(name, damage, energy_consume, cooldown, ability_type, MELEE_COLOR)
+        name_color = type.name_color
+        return AbilityStatistics(name, damage, energy_consume, cooldown, ability_type, name_color)
 
 
 
 class ToughenUp(Ability):
     name = "Toughen Up"
     ability_type = "Passive"
+    name_color = PASSIVE_COLOR
 
     def __init__(self):
         Ability.__init__(self)
@@ -53,6 +57,7 @@ class Attack(Ability):
 
     name = "Strike"
     ability_type = "Melee"
+    name_color = MELEE_COLOR
 
     def __init__(self, player_to_click, sprite_cord, from_player, ability_level):
         Ability.__init__(self)
@@ -144,6 +149,7 @@ class Sweep(Attack):
 
     name = "Sweep"
     ability_type = "Melee"
+    name_color = MELEE_COLOR
 
     def __init__(self, player_to_click, sprite_cord, from_player, ability_level):
         Attack.__init__(self, player_to_click, sprite_cord, from_player, ability_level)
@@ -186,6 +192,7 @@ class Arrow(Attack):
 
     name = "SingleShot"
     ability_type = "Range"
+    name_color = RANGE_COLOR
 
     def __init__(self, player_to_click, sprite_cord, from_player, ability_level):
         Attack.__init__(self, player_to_click, sprite_cord, from_player, ability_level)
@@ -234,6 +241,7 @@ class SplitShot(Arrow):
 
     name = "SplitShot"
     ability_type = "Range"
+    name_color = RANGE_COLOR
 
     def __init__(self, player_to_click, sprite_cord, from_player, ability_level):
         Arrow.__init__(self, player_to_click, sprite_cord, from_player, ability_level)
@@ -258,6 +266,7 @@ class Lightning(Arrow):
 
     name = "Lightning"
     ability_type = "Magic"
+    name_color = MAGIC_COLOR
 
     def __init__(self, player_to_click,  sprite_cord, from_player, ability_level):
         Arrow.__init__(self, player_to_click, sprite_cord, from_player, ability_level)
@@ -293,6 +302,7 @@ class FireStorm(Ability):
 
     name = "FireStorm"
     ability_type = "Magic"
+    name_color = MAGIC_COLOR
 
     def __init__(self, player_to_click, sprite_cord, from_player, ability_level):
         pygame.sprite.Sprite.__init__(self)
