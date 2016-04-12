@@ -6,11 +6,11 @@ from SpriteSheet import SpriteSheet
 from math import atan
 from math import degrees
 from random import randrange
-from collections import namedtuple
-
-AbilityStatistics = namedtuple('AbilityStatistics', 'name damage energy_consume cooldown ability_type name_color info_color')
 
 # If you get add_internal error, make sure you inherit from pygame.sprite.Sprite
+pygame.font.init()
+FONT = pygame.font.Font(None, 26)
+
 
 MELEE_COLOR = (220, 20, 60)
 MELEE_INFO_COLOR = (220, 100, 120)
@@ -25,12 +25,15 @@ PASSIVE_COLOR = (200, 150, 100)
 PASSIVE_INFO_COLOR = (180, 160, 110)
 
 
+def adjust(detail_box, x):
+    return list(map(lambda x, y: x + y, x, detail_box))
+
 class Ability(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
 
     @staticmethod
-    def gather_statistics(type, ability_level):
+    def gather_statistics(type, ability_level, detail_box):
         name = type.name
         damage = type.calc_damage(ability_level, True)
         energy_consume = type.calc_energy_consume(ability_level, True)
@@ -38,13 +41,14 @@ class Ability(pygame.sprite.Sprite):
         ability_type = type.ability_type
         name_color = type.name_color
         info_color = type.info_color
-        return AbilityStatistics(name, damage, energy_consume, cooldown, ability_type, name_color, info_color)
+        return {"name":name, "damage":damage, "energy":energy_consume, "cooldown":
+                                cooldown, "type":ability_type, "name_color":name_color, "info_color":info_color}
 
 
 
 class ToughenUp(Ability):
     name = "Toughen Up"
-    ability_type = "Passive"
+    ability_type = "Type: Passive"
     name_color = PASSIVE_COLOR
     info_color = PASSIVE_INFO_COLOR
 
@@ -62,6 +66,12 @@ class ToughenUp(Ability):
     @staticmethod
     def calc_energy_consume(ability_level, from_player):
         return None
+
+    @staticmethod
+    def gather_statistics(type, ability_level, detail_box):
+        name = ToughenUp.name
+        type = ToughenUp.ability_type
+
 
 class Attack(Ability):
 
@@ -155,6 +165,15 @@ class Attack(Ability):
     def calc_energy_consume(ability_level, from_player):
         return 10
 
+    @staticmethod
+    def gather_statistics(type, ability_level, detail_box):
+        stats = {}
+        stats[FONT.render(type.name, True, MELEE_COLOR)] = adjust(detail_box, (10, 10))
+        stats[FONT.render(type.ability_type, True, MELEE_INFO_COLOR)] = adjust(detail_box, (10, 50))
+        stats[FONT.render(str(type.calc_damage(ability_level, True)), True, MELEE_INFO_COLOR)] = adjust(detail_box, (110, 10))
+        stats[FONT.render(str(type.calc_energy_consume(ability_level, True)), True, MELEE_INFO_COLOR)] = adjust(detail_box, (225, 10))
+        stats[FONT.render(str(type.calc_cooldown(ability_level, True)), True, MELEE_INFO_COLOR)] = adjust(detail_box, (120, 50))
+        return stats
 
 class Sweep(Attack):
 

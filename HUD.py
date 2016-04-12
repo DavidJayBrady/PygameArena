@@ -188,37 +188,19 @@ class AbilityManager:
     def _draw_ability_details(self, screen, index, ability_levels, from_hotkey):
         position = Rect(30, 540, 300, 50) if not self.menu_up else Rect(30, 260, 300, 50)
 
-        print(index)
-
         if not from_hotkey:
             highlighted_ability = self.ability_list[index]
         else:
             highlighted_ability = self.ability_hotkeys[index]
 
         try:
-            ability_statistics = S.Ability.gather_statistics(highlighted_ability, ability_levels[highlighted_ability])
+            ability_statistics = highlighted_ability.gather_statistics(
+                highlighted_ability,ability_levels[highlighted_ability], list(position)[:2])
 
             screen.blit(self.ability_background_image, position)
+            for text, position in ability_statistics.items():
+                screen.blit(text, position)
 
-            name_color = ability_statistics.name_color
-            info_color = ability_statistics.info_color
-            name = self.font.render(ability_statistics.name, True, name_color)
-            damage = self.font.render("Damage: "+str(ability_statistics.damage), True, info_color)
-            energy_consume = self.font.render("Energy Cost: "+str(ability_statistics.energy_consume), True, info_color)
-            cooldown = self.font.render("Cooldown: "+str(ability_statistics.cooldown), True, info_color)
-            ability_type = self.font.render("Type: "+(ability_statistics.ability_type), True, info_color)
-
-            name_pos = list(map(lambda x, y: x + y, position ,[10, 10]))
-            damage_pos = list(map(lambda x, y: x + y, position ,[110, 10]))
-            energy_consume_pos = list(map(lambda x, y: x + y, position,[225, 10]))
-            cooldown_pos = list(map(lambda x, y: x + y, position ,[120, 50]))
-            ability_type_pos = list(map(lambda x, y: x + y, position ,[10, 50]))
-
-            screen.blit(name, name_pos)
-            screen.blit(damage, damage_pos)
-            screen.blit(energy_consume, energy_consume_pos)
-            screen.blit(cooldown, cooldown_pos)
-            screen.blit(ability_type, ability_type_pos)
 
 
         except KeyError:
