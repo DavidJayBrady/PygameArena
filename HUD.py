@@ -3,6 +3,13 @@ from pygame.locals import *
 
 import Sword as S
 
+# REINIT EVERY TIME ABILITY LEVELS UP TO RECALCULATE THE CLASS ATTRIBUTES
+
+
+# How to handle the difference in player ability levels and monster ability levels
+#   Could have two separate variables.
+
+
 class Bar:
     def __init__(self, offset, uses_caps, type: str):
         self.offset = offset
@@ -54,7 +61,6 @@ class Bar:
         self.bar = pygame.transform.smoothscale(self.bar, [(current_scale if current_scale != 0 else 1), 40])
         self.empty_bar = pygame.transform.smoothscale(self.empty_bar, [max_scale, 40])
 
-
 class AbilityManager:
     def __init__(self):
 
@@ -88,7 +94,7 @@ class AbilityManager:
         self.ability_list = [S.Attack, S.Sweep, S.Arrow, S.SplitShot,
                              S.Lightning, S.FireStorm, S.ToughenUp, None, None, None, None, None]
 
-        # Controls what spell goes on which hotkey, and the image that shows up.
+        # Controls what spell goes on which hotkey, and the image that shows up. These are defaults.
         self.ability_hotkeys = {0: S.Attack, 1: S.Sweep, 2: S.Arrow, 3: S.SplitShot}
 
         # Default starting ability.
@@ -114,7 +120,7 @@ class AbilityManager:
             for j in range(4):
                 self.menu_rects[j + (i*4)] = Rect([40 + (j*90), 550 - (i*90), 80, 80])
 
-    def draw(self, screen):
+    def draw(self, screen, ability_levels):
         if self.menu_up:
             self._highlight_scrolled_over_ability(screen, self.menu_rects)
             self._draw_abilities(screen, self.ability_menu_background_image,
@@ -128,7 +134,7 @@ class AbilityManager:
         self._draw_abilities(screen, self.ability_menu_background_image, self.ability_background_rect,
                              self.ability_hotkeys, self.ability_rect_list)
 
-        self._draw_hotkey_details(screen)
+        self._draw_hotkey_details(screen, ability_levels)
 
     def ability_image_clicked(self, click_pos: tuple):
         for index, ability_square in enumerate(self.ability_rect_list):
@@ -139,8 +145,8 @@ class AbilityManager:
     def menu_ability_clicked(self, click_pos: tuple):
         for index in range(len(self.menu_rects)):
             if self.menu_rects[index].collidepoint(click_pos):
-                return (True, index)
-        return (False, '_')
+                return (True, self.ability_list[index], index)
+        return (False)
 
     def change_hotkey(self, index):
         self.ability_hotkeys[self.ability_to_change] = self.ability_list[index]
@@ -148,10 +154,10 @@ class AbilityManager:
     def set_menu_up(self, setting: bool):
         self.menu_up = setting
 
-    def _draw_hotkey_details(self, screen):
+    def _draw_hotkey_details(self, screen, ability_levels):
         for i in range(4): # Draw ability details. Hotkey at top left, "Level x" at bottom mid.
             try:
-                text = self.font.render("Level " + str(self.ability_hotkeys[i].ability_level), True, (100, 200, 200))
+                text = self.font.render("Level " + str(ability_levels[self.ability_hotkeys[i]]), True, (100, 200, 200))
                 text_pos = list(map(lambda x, y: x - y, self.ability_rect_list[i].bottomright, [70, 0]))
                 screen.blit(self.hotkey_texts[i], self.ability_rect_list[i].topleft)
                 screen.blit(text, text_pos)

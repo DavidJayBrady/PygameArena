@@ -61,9 +61,7 @@ class PgGroup(pygame.sprite.Group):
         for sprite in rest_of_sprites:
             screen.blit(sprite.image, sprite.rect)
 
-
 class GameState:
-
     def __init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode((1280, 800))
@@ -79,7 +77,6 @@ class GameState:
 
         self.monsters = Monster.spawn_monsters(self.character, self.walls, ((ChampionMeleeMonster, 10), (Monster, 20),
                                                                             (RangeMonster, 20)))
-
 
         self.ability_manager = AbilityManager()
 
@@ -142,7 +139,7 @@ class GameState:
                     if self.ability_manager.menu_up:
                         test_index = self.ability_manager.menu_ability_clicked(event.pos)
                         if test_index[0]:
-                            self.ability_manager.change_hotkey(test_index[1])
+                            self.ability_manager.change_hotkey(test_index[2])
                     if self.ability_manager.ability_image_clicked(event.pos):
                         self.ability_manager.set_menu_up(True) if not self.ability_manager.menu_up else self.ability_manager.set_menu_up(False)
                     else:
@@ -155,9 +152,9 @@ class GameState:
                     if self.ability_manager.menu_up:
                         test_index = self.ability_manager.menu_ability_clicked(event.pos)
                         if test_index[0] and self.ability_manager.ability_points > 0:
-                            self.ability_manager.ability_list[test_index[1]].level_up()
+                            self.character.ability_levels[test_index[1]] += 1
                             self.ability_manager.ability_points -= 1
-                            self.character.increment_maxes(ToughenUp.ability_level)
+                            self.character.increment_maxes()
             b = pygame.time.get_ticks() - a
             self.screen.fill((0, 0, 0))
 
@@ -181,7 +178,7 @@ class GameState:
             self.clear_weapon() # Must be after draw. Keep at end of loop, since attack happens in event for loop.
             self.clear_dead()
 
-            self.character.recover(ToughenUp.ability_level)
+            self.character.recover()
 
             f = pygame.time.get_ticks() - (e + d + c + b + a + z)
 
@@ -191,7 +188,7 @@ class GameState:
             for monster in self.monsters:
                 monster.draw_health_bar(self.screen)
             g = pygame.time.get_ticks() - (f + e + d + c + b + a + z)
-            self.ability_manager.draw(self.screen)
+            self.ability_manager.draw(self.screen, self.character.ability_levels)
             h = pygame.time.get_ticks() - (g + f + e + d + c + b + a + z)
 
             if self.time_test:

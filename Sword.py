@@ -11,21 +11,13 @@ from random import randrange
 
 
 class ToughenUp:
-    ability_level = 1
 
     def __init__(self, player_to_click, sprite_cord, from_player, ability_level):
         self.coodown = 10000
         self.energy_consume = 0
         self.damage = 0
 
-    @staticmethod
-    def level_up():
-        ToughenUp.ability_level += 1
-
-
 class Attack(pygame.sprite.Sprite):
-
-    ability_level = 1
 
     def __init__(self, player_to_click, sprite_cord, from_player, ability_level):
         pygame.sprite.Sprite.__init__(self)
@@ -39,13 +31,11 @@ class Attack(pygame.sprite.Sprite):
 
         self.move_image(self.unit_vect, sprite_cord)
 
-        self.damage = 15 + (ability_level * 10) if from_player else 10
-
         self.dead = True
 
-        self.energy_consume = 10
-
+        self.damage = 10 + (ability_level * 5) if from_player else 10
         self.cooldown = 400 if from_player else 600
+        self.energy_consume = 10
 
     def find_angle(self, unit_vect: pygame.math.Vector2) -> int:  # Make better name sometime
         try:
@@ -103,13 +93,8 @@ class Attack(pygame.sprite.Sprite):
         return self.dead
 
 
-    @staticmethod
-    def level_up():
-        Attack.ability_level += 1
-
 class Sweep(Attack):
 
-    ability_level = 1
 
     def __init__(self, player_to_click, sprite_cord, from_player, ability_level):
         Attack.__init__(self, player_to_click, sprite_cord, from_player, ability_level)
@@ -139,13 +124,7 @@ class Sweep(Attack):
         if self.rotated >= 360:
             self.dead = True
 
-    @staticmethod
-    def level_up():
-        Sweep.ability_level += 1
-
 class Arrow(Attack):
-
-    ability_level = 1
 
     def __init__(self, player_to_click, sprite_cord, from_player, ability_level):
         Attack.__init__(self, player_to_click, sprite_cord, from_player, ability_level)
@@ -183,14 +162,9 @@ class Arrow(Attack):
         if not isinstance(collided_sprite, Arrow):
             self.dead = True
 
-    @staticmethod
-    def level_up():
-        Arrow.ability_level += 1
-
 
 class SplitShot:
 
-    ability_level = 1
 
     def __init__(self, player_to_click, sprite_cord, from_player, ability_level):
         unit_vect = player_to_click.normalize()
@@ -209,13 +183,9 @@ class SplitShot:
 
         self.energy_consume = self.arrow1.energy_consume * 3
 
-    @staticmethod
-    def level_up():
-        SplitShot.ability_level += 1
 
 class Lightning(Arrow):
 
-    ability_level = 1
 
     def __init__(self, player_to_click,  sprite_cord, from_player, ability_level):
         Arrow.__init__(self, player_to_click, sprite_cord, from_player, ability_level)
@@ -233,13 +203,9 @@ class Lightning(Arrow):
         # Rotate sword to go in direction of click. Minus 90 because sword originally points upwards.
         self.image = pygame.transform.rotate(self.image, self.angle)
 
-    @staticmethod
-    def level_up():
-        Lightning.ability_level += 1
 
 class FireStorm(pygame.sprite.Sprite):
 
-    ability_level = 1
 
     def __init__(self, player_to_click, sprite_cord, from_player, ability_level):
         pygame.sprite.Sprite.__init__(self)
@@ -281,11 +247,6 @@ class FireStorm(pygame.sprite.Sprite):
         :action: Move fire with character, so its path is normal.
         '''
         self.rect.move_ip(character_velocity[0], character_velocity[1])
-
-
-    @staticmethod
-    def level_up():
-        FireStorm.ability_level += 1
 
     def is_dead(self):
         return self.dead
