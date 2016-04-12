@@ -19,7 +19,6 @@ from Monster import RangeMonster
 from HUD import AbilityManager
 from Sword import Attack
 from Sword import FireStorm
-from Sword import ToughenUp
 
 
 '''

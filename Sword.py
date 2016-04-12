@@ -6,21 +6,56 @@ from SpriteSheet import SpriteSheet
 from math import atan
 from math import degrees
 from random import randrange
+from collections import namedtuple
+
+AbilityStatistics = namedtuple('AbilityStatistics', 'name damage energy_consume cooldown ability_type ability_text_color')
 
 # If you get add_internal error, make sure you inherit from pygame.sprite.Sprite
 
+global MELEE_COLOR
+MELEE_COLOR = (220, 20, 20)
 
-class ToughenUp:
-
-    def __init__(self, player_to_click, sprite_cord, from_player, ability_level):
-        self.coodown = 10000
-        self.energy_consume = 0
-        self.damage = 0
-
-class Attack(pygame.sprite.Sprite):
-
-    def __init__(self, player_to_click, sprite_cord, from_player, ability_level):
+class Ability(pygame.sprite.Sprite):
+    def __init__(self):
         pygame.sprite.Sprite.__init__(self)
+
+    @staticmethod
+    def gather_statistics(type, ability_level):
+        name = type.name
+        damage = type.calc_damage(ability_level, True)
+        energy_consume = type.calc_energy_consume(ability_level, True)
+        cooldown = type.calc_cooldown(ability_level, True)
+        ability_type = type.ability_type
+        return AbilityStatistics(name, damage, energy_consume, cooldown, ability_type, MELEE_COLOR)
+
+
+
+class ToughenUp(Ability):
+    name = "Toughen Up"
+    ability_type = "Passive"
+
+    def __init__(self):
+        Ability.__init__(self)
+
+    @staticmethod
+    def calc_damage(ability_level, from_player):
+        return None
+
+    @staticmethod
+    def calc_cooldown(ability_level, from_player):
+        return None
+
+    @staticmethod
+    def calc_energy_consume(ability_level, from_player):
+        return None
+
+class Attack(Ability):
+
+    name = "Strike"
+    ability_type = "Melee"
+
+    def __init__(self, player_to_click, sprite_cord, from_player, ability_level):
+        Ability.__init__(self)
 
         self.unit_vect = player_to_click.normalize()
 
@@ -33,8 +68,8 @@ class Attack(pygame.sprite.Sprite):
 
         self.dead = True
 
-        self.damage = 10 + (ability_level * 5) if from_player else 10
-        self.cooldown = 400 if from_player else 600
+        self.damage = self.calc_damage(ability_level, from_player)
+        self.cooldown = self.calc_cooldown(ability_level, from_player)
         self.energy_consume = 10
 
     def find_angle(self, unit_vect: pygame.math.Vector2) -> int:  # Make better name sometime
@@ -92,22 +127,32 @@ class Attack(pygame.sprite.Sprite):
     def is_dead(self):
         return self.dead
 
+    @staticmethod
+    def calc_damage(ability_level, from_player):
+        return 15 + (ability_level * 5) if from_player else 10 + (ability_level * 5)
+
+    @staticmethod
+    def calc_cooldown(ability_level, from_player):
+        return 400 if from_player else 600
+
+    @staticmethod
+    def calc_energy_consume(ability_level, from_player):
+        return 10
+
 
 class Sweep(Attack):
 
+    name = "Sweep"
+    ability_type = "Melee"
 
     def __init__(self, player_to_click, sprite_cord, from_player, ability_level):
         Attack.__init__(self, player_to_click, sprite_cord, from_player, ability_level)
-
         self.from_player = from_player
-
         self.rotated = 0
         self.dead = False
 
         self.damage = 10 + (ability_level * 5)
-
         self.energy_consume = 25
-
         self.cooldown = 800
 
         # Makes Sweep start right at click.
@@ -124,11 +169,26 @@ class Sweep(Attack):
         if self.rotated >= 360:
             self.dead = True
 
+    @staticmethod
+    def calc_damage(ability_level, from_player):
+        return 10 + (ability_level * 5)
+
+    @staticmethod
+    def calc_cooldown(ability_level, from_player):
+        return 800
+
+    @staticmethod
+    def calc_energy_consume(ability_level, from_player):
+        return 25
+
+
 class Arrow(Attack):
+
+    name = "SingleShot"
+    ability_type = "Range"
 
     def __init__(self, player_to_click, sprite_cord, from_player, ability_level):
         Attack.__init__(self, player_to_click, sprite_cord, from_player, ability_level)
-
 
         self.x_move_ratio = self.unit_vect[0] * 20
         self.y_move_ratio = self.unit_vect[1] * 20
@@ -162,11 +222,21 @@ class Arrow(Attack):
         if not isinstance(collided_sprite, Arrow):
             self.dead = True
 
+    @staticmethod
+    def calc_damage(ability_level, from_player):
+        return 10 + (ability_level * 5)
 
-class SplitShot:
+    @staticmethod
+    def calc_cooldown(ability_level, from_player):
+        return 450 if from_player else 2500
 
+class SplitShot(Arrow):
+
+    name = "SplitShot"
+    ability_type = "Range"
 
     def __init__(self, player_to_click, sprite_cord, from_player, ability_level):
+        Arrow.__init__(self, player_to_click, sprite_cord, from_player, ability_level)
         unit_vect = player_to_click.normalize()
 
         mag_vect = player_to_click.length()
@@ -186,12 +256,15 @@ class SplitShot:
 
 class Lightning(Arrow):
 
+    name = "Lightning"
+    ability_type = "Magic"
 
     def __init__(self, player_to_click,  sprite_cord, from_player, ability_level):
         Arrow.__init__(self, player_to_click, sprite_cord, from_player, ability_level)
 
-        self.cooldown = 350
-        self.damage = randrange(3, 17)  + (ability_level * (randrange(2, 6)))
+        self.damage = Lightning.calc_damage(ability_level, from_player)
+        self.cooldown = self.calc_cooldown(ability_level, from_player)
+        self.energy_consume = Lightning.calc_energy_consume(ability_level, from_player)
 
         self.x_move_ratio = self.unit_vect[0] * 70
         self.y_move_ratio = self.unit_vect[1] * 70
@@ -203,9 +276,23 @@ class Lightning(Arrow):
         # Rotate sword to go in direction of click. Minus 90 because sword originally points upwards.
         self.image = pygame.transform.rotate(self.image, self.angle)
 
+    @staticmethod
+    def calc_damage(ability_level, from_player):
+        return randrange(3, 17) + (ability_level * (randrange(2,6)))
 
-class FireStorm(pygame.sprite.Sprite):
+    @staticmethod
+    def calc_cooldown(ability_level, from_player):
+        return 350
 
+    @staticmethod
+    def calc_energy_consume(ability_level, from_player):
+        return 10
+
+
+class FireStorm(Ability):
+
+    name = "FireStorm"
+    ability_type = "Magic"
 
     def __init__(self, player_to_click, sprite_cord, from_player, ability_level):
         pygame.sprite.Sprite.__init__(self)
@@ -221,11 +308,11 @@ class FireStorm(pygame.sprite.Sprite):
         # 608, 368 is Center of character
         self.rect = Rect(list(map(lambda x, y: x + y, (608, 368), player_to_click)) + [64, 64])
 
-        self.cooldown = 600
+        self.cooldown = FireStorm.calc_cooldown(ability_level, from_player)
 
-        self.energy_consume = 30
+        self.energy_consume = FireStorm.calc_energy_consume(ability_level, from_player)
 
-        self.damage = 4 + (ability_level * .5)
+        self.damage = FireStorm.calc_damage(ability_level, from_player)
 
         self.dead = False
 
@@ -250,6 +337,18 @@ class FireStorm(pygame.sprite.Sprite):
 
     def is_dead(self):
         return self.dead
+
+    @staticmethod
+    def calc_damage(ability_level, from_player):
+        return 4 + (ability_level * .5)
+
+    @staticmethod
+    def calc_cooldown(ability_level, from_player):
+        return 600
+
+    @staticmethod
+    def calc_energy_consume(ability_level, from_player):
+        return 30
 
 # Spell idea, put lightning thorns around player.
 # So that walking around a monster would do damage, or weird armor buff,

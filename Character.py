@@ -47,6 +47,7 @@ class Character(Mover):
         self.speed = [.075, .075]   # pixels per millisecond
         self.velocity = [0, 0]
 
+        # Used to limit attacks per second.
         self.timer = pygame.time.get_ticks()
 
         self.max_health = 700
@@ -75,7 +76,7 @@ class Character(Mover):
                 if not self.energy - weapon.energy_consume < 0:
                     self.timer = pygame.time.get_ticks()
                     self.energy -= weapon.energy_consume
-                    if isinstance(weapon, S.Attack) or isinstance(weapon, S.FireStorm):
+                    if isinstance(weapon, S.Attack) and type(weapon) is not S.SplitShot or isinstance(weapon, S.FireStorm):
                         return weapon
                     # For Splitshot.
                     else:
