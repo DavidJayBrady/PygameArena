@@ -85,6 +85,9 @@ class AbilityManager:
                                S.SplitShot: splitshot_image, S.Lightning: lightning_image,
                                S.FireStorm: firestorm_image}
 
+        self.ability_names = {S.ToughenUp: "Toughen Up", S.Attack: "Strike", S.Sweep: "Sweep", S.Arrow: 'SingleShot',
+                              S.SplitShot: "Splitshot", S.Lightning: "Lightning", S.FireStorm: "FireStorm"}
+
         self.ability_points = 11
 
         # Used to draw the ability menu popup. Position is determined by menu_rects. 1 is bottom left, 2 is right of 1.
@@ -119,14 +122,16 @@ class AbilityManager:
 
     def draw(self, screen, ability_levels):
         if self.menu_up:
-            self._highlight_scrolled_over_ability(screen, self.menu_rects, ability_levels)
+            self._highlight_scrolled_over_ability(screen, self.menu_rects, ability_levels, False)
             self._draw_abilities(screen, self.ability_menu_background_image,
                                  self.ability_menu_background_rect, self.ability_list, self.menu_rects)
 
-        if self.ability_points > 0:
-            screen.blit(self.font.render(str(self.ability_points) +' ability point to spend', True, (50, 150, 150)),[50, 140])
+        self._highlight_scrolled_over_ability(screen, self.ability_rect_list, ability_levels, True)
 
-        self._highlight_scrolled_over_ability(screen, self.ability_rect_list, ability_levels)
+        if self.ability_points > 0:
+            extra_text = ' ability point to spend' if self.ability_points == 1 else ' ability points to spend'
+            screen.blit(self.font.render(str(self.ability_points) + extra_text, True, (50, 150, 150)),[50, 140])
+
 
         self._draw_abilities(screen, self.ability_menu_background_image, self.ability_background_rect,
                              self.ability_hotkeys, self.ability_rect_list)
@@ -161,12 +166,12 @@ class AbilityManager:
             except KeyError:
                 pass # So we can have abilities be empty.
 
-    def _highlight_scrolled_over_ability(self, screen, rect_container, ability_levels):
-        # Highlight scrolled over ability image
+    def _highlight_scrolled_over_ability(self, screen, rect_container, ability_levels, from_hotkeys: bool):
+        # Highlight scrolled over picture in menu.
         for i in range(len(rect_container)):
             if rect_container[i].collidepoint(pygame.mouse.get_pos()):
-                print(i)
-                self._draw_ability_details(screen, i, ability_levels)
+
+                self._draw_ability_details(screen, i, ability_levels, from_hotkeys) # True if from hotkey, False if from menu.
                 pygame.draw.rect(screen, (0, 200, 200), rect_container[i])
 
     def _draw_abilities(self, screen, image, image_rect, abilities, rect_container):
@@ -180,28 +185,33 @@ class AbilityManager:
         if weapon is not None:
             screen.blit(self.ability_images[weapon], ability_rect)
 
-    def _draw_ability_details(self, screen, highlighted_ability, ability_levels):
+    def _draw_ability_details(self, screen, index, ability_levels, from_hotkey):
         position = Rect(30, 540, 300, 50) if not self.menu_up else Rect(30, 260, 300, 50)
 
-        print(highlighted_ability)
+        print(index)
 
-        highlighted_ability = self.ability_list[highlighted_ability]
+        if not from_hotkey:
+            highlighted_ability = self.ability_list[index]
+        else:
+            highlighted_ability = self.ability_hotkeys[index]
+
         try:
             ability_statistics = S.Ability.gather_statistics(highlighted_ability, ability_levels[highlighted_ability])
 
             screen.blit(self.ability_background_image, position)
 
             name_color = ability_statistics.name_color
+            info_color = ability_statistics.info_color
             name = self.font.render(ability_statistics.name, True, name_color)
-            damage = self.font.render(str(ability_statistics.damage), True, (80, 200, 120))
-            energy_consume = self.font.render(str(ability_statistics.energy_consume), True, (80, 200, 120))
-            cooldown = self.font.render(str(ability_statistics.cooldown), True, (80, 200, 120))
-            ability_type = self.font.render((ability_statistics.ability_type), True, (80, 200, 120))
+            damage = self.font.render("Damage: "+str(ability_statistics.damage), True, info_color)
+            energy_consume = self.font.render("Energy Cost: "+str(ability_statistics.energy_consume), True, info_color)
+            cooldown = self.font.render("Cooldown: "+str(ability_statistics.cooldown), True, info_color)
+            ability_type = self.font.render("Type: "+(ability_statistics.ability_type), True, info_color)
 
             name_pos = list(map(lambda x, y: x + y, position ,[10, 10]))
-            damage_pos = list(map(lambda x, y: x + y, position ,[100, 10]))
-            energy_consume_pos = list(map(lambda x, y: x + y, position,[200, 10]))
-            cooldown_pos = list(map(lambda x, y: x + y, position ,[300, 10]))
+            damage_pos = list(map(lambda x, y: x + y, position ,[110, 10]))
+            energy_consume_pos = list(map(lambda x, y: x + y, position,[225, 10]))
+            cooldown_pos = list(map(lambda x, y: x + y, position ,[120, 50]))
             ability_type_pos = list(map(lambda x, y: x + y, position ,[10, 50]))
 
             screen.blit(name, name_pos)
