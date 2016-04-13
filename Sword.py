@@ -34,16 +34,13 @@ class Ability(pygame.sprite.Sprite):
 
     @staticmethod
     def gather_statistics(type, ability_level, detail_box):
-        name = type.name
-        damage = type.calc_damage(ability_level, True)
-        energy_consume = type.calc_energy_consume(ability_level, True)
-        cooldown = type.calc_cooldown(ability_level, True)
-        ability_type = type.ability_type
-        name_color = type.name_color
-        info_color = type.info_color
-        return {"name":name, "damage":damage, "energy":energy_consume, "cooldown":
-                                cooldown, "type":ability_type, "name_color":name_color, "info_color":info_color}
-
+        stats = {}
+        stats[FONT.render(type.name, True, type.name_color)] = adjust(detail_box, (10, 10))
+        stats[FONT.render("Type: " +str(type.ability_type), True, type.info_color)] = adjust(detail_box, (10, 50))
+        stats[FONT.render("Damage: "+str(type.calc_damage(ability_level, True)), True, type.info_color)] = adjust(detail_box, (110, 10))
+        stats[FONT.render("Energy: "+str(type.calc_energy_consume(ability_level, True)), True, type.info_color)] = adjust(detail_box, (225, 10))
+        stats[FONT.render("Cooldown: "+str(type.calc_cooldown(ability_level, True)), True, type.info_color)] = adjust(detail_box, (120, 50))
+        return stats
 
 
 class ToughenUp(Ability):
@@ -66,11 +63,6 @@ class ToughenUp(Ability):
     @staticmethod
     def calc_energy_consume(ability_level, from_player):
         return None
-
-    @staticmethod
-    def gather_statistics(type, ability_level, detail_box):
-        name = ToughenUp.name
-        type = ToughenUp.ability_type
 
 
 class Attack(Ability):
@@ -165,15 +157,7 @@ class Attack(Ability):
     def calc_energy_consume(ability_level, from_player):
         return 10
 
-    @staticmethod
-    def gather_statistics(type, ability_level, detail_box):
-        stats = {}
-        stats[FONT.render(type.name, True, MELEE_COLOR)] = adjust(detail_box, (10, 10))
-        stats[FONT.render(type.ability_type, True, MELEE_INFO_COLOR)] = adjust(detail_box, (10, 50))
-        stats[FONT.render(str(type.calc_damage(ability_level, True)), True, MELEE_INFO_COLOR)] = adjust(detail_box, (110, 10))
-        stats[FONT.render(str(type.calc_energy_consume(ability_level, True)), True, MELEE_INFO_COLOR)] = adjust(detail_box, (225, 10))
-        stats[FONT.render(str(type.calc_cooldown(ability_level, True)), True, MELEE_INFO_COLOR)] = adjust(detail_box, (120, 50))
-        return stats
+
 
 class Sweep(Attack):
 
