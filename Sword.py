@@ -36,16 +36,19 @@ class Ability(pygame.sprite.Sprite):
     def gather_statistics(type, ability_level, detail_box):
         stats = {}
         stats[FONT.render(type.name, True, type.name_color)] = adjust(detail_box, (10, 10))
-        stats[FONT.render("Type: " +str(type.ability_type), True, type.info_color)] = adjust(detail_box, (10, 50))
-        stats[FONT.render("Damage: "+str(type.calc_damage(ability_level, True)), True, type.info_color)] = adjust(detail_box, (110, 10))
-        stats[FONT.render("Energy: "+str(type.calc_energy_consume(ability_level, True)), True, type.info_color)] = adjust(detail_box, (225, 10))
-        stats[FONT.render("Cooldown: "+str(type.calc_cooldown(ability_level, True)), True, type.info_color)] = adjust(detail_box, (120, 50))
+        stats[FONT.render("Level: "+str(ability_level), True, type.info_color)] = adjust(detail_box, (110, 10))
+        stats[FONT.render("Type: " +str(type.ability_type), True, type.info_color)] = adjust(detail_box, (250, 50))
+        stats[FONT.render("Damage: "+str(type.calc_damage(ability_level, True)), True, type.info_color)] = adjust(detail_box, (225, 10))
+        stats[FONT.render("Energy: "+str(type.calc_energy_consume(ability_level, True)), True, type.info_color)] = adjust(detail_box, (10, 50))
+        stats[FONT.render("Cooldown: "+str(type.calc_cooldown(ability_level, True)), True, type.info_color)] = adjust(detail_box, (110, 50))
+        stats[FONT.render(type.description, True, type.info_color)] = adjust(detail_box, (10, 80))
         return stats
 
 
 class ToughenUp(Ability):
     name = "Toughen Up"
-    ability_type = "Type: Passive"
+    ability_type = "Passive"
+    description = "Increases HP capacity and regeneration."
     name_color = PASSIVE_COLOR
     info_color = PASSIVE_INFO_COLOR
 
@@ -64,11 +67,21 @@ class ToughenUp(Ability):
     def calc_energy_consume(ability_level, from_player):
         return None
 
+    @staticmethod
+    def gather_statistics(type, ability_level, detail_box):
+        stats = {}
+        stats[FONT.render(type.name, True, type.name_color)] = adjust(detail_box, (10, 10))
+        stats[FONT.render("Level: "+str(ability_level), True, type.info_color)] = adjust(detail_box, (130, 10))
+        stats[FONT.render("Type: " +str(type.ability_type), True, type.info_color)] = adjust(detail_box, (215, 10))
+        stats[FONT.render(type.description, True, type.info_color)] = adjust(detail_box, (10, 80))
+        return stats
+
 
 class Attack(Ability):
 
     name = "Strike"
     ability_type = "Melee"
+    description = "Strike in front of character"
     name_color = MELEE_COLOR
     info_color = MELEE_INFO_COLOR
 
@@ -158,11 +171,11 @@ class Attack(Ability):
         return 10
 
 
-
 class Sweep(Attack):
 
     name = "Sweep"
     ability_type = "Melee"
+    description = "Melee attack around player."
     name_color = MELEE_COLOR
     info_coor = MELEE_INFO_COLOR
 
@@ -207,6 +220,7 @@ class Arrow(Attack):
 
     name = "SingleShot"
     ability_type = "Range"
+    description = "Fires a single arrow."
     name_color = RANGE_COLOR
     info_color = RANGE_INFO_COLOR
 
@@ -257,6 +271,7 @@ class SplitShot(Arrow):
 
     name = "SplitShot"
     ability_type = "Range"
+    description = "Fires 3 arrows in a cone."
     name_color = RANGE_COLOR
     info_color = RANGE_INFO_COLOR
 
@@ -283,6 +298,7 @@ class Lightning(Arrow):
 
     name = "Lightning"
     ability_type = "Magic"
+    description = "Fast and and varied damage"
     name_color = MAGIC_COLOR
     info_color = MAGIC_INFO_COLOR
 
@@ -305,7 +321,7 @@ class Lightning(Arrow):
 
     @staticmethod
     def calc_damage(ability_level, from_player):
-        return randrange(3, 17) + (ability_level * (randrange(2,6)))
+        return randrange(3, 35) + (ability_level * (randrange(2,6)))
 
     @staticmethod
     def calc_cooldown(ability_level, from_player):
@@ -320,6 +336,7 @@ class FireStorm(Ability):
 
     name = "FireStorm"
     ability_type = "Magic"
+    description = "Burn an area, damage over time"
     name_color = MAGIC_COLOR
     info_color = MAGIC_INFO_COLOR
 
@@ -369,7 +386,7 @@ class FireStorm(Ability):
 
     @staticmethod
     def calc_damage(ability_level, from_player):
-        return 4 + (ability_level * .5)
+        return 1 + (ability_level * .5)
 
     @staticmethod
     def calc_cooldown(ability_level, from_player):

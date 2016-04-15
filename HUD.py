@@ -88,7 +88,7 @@ class AbilityManager:
         self.ability_names = {S.ToughenUp: "Toughen Up", S.Attack: "Strike", S.Sweep: "Sweep", S.Arrow: 'SingleShot',
                               S.SplitShot: "Splitshot", S.Lightning: "Lightning", S.FireStorm: "FireStorm"}
 
-        self.ability_points = 11
+        self.ability_points = 10
 
         # Used to draw the ability menu popup. Position is determined by menu_rects. 1 is bottom left, 2 is right of 1.
         self.ability_list = [S.Attack, S.Sweep, S.Arrow, S.SplitShot,
@@ -203,5 +203,5 @@ class AbilityManager:
 
 
 
-        except KeyError:
+        except (KeyError, AttributeError):
             pass
