@@ -19,7 +19,7 @@ from Monster import RangeMonster
 from HUD import AbilityManager
 from Sword import Attack
 from Sword import FireStorm
-
+from Sword import FRAME_RATE
 
 '''
 Some things to take a next step:
@@ -202,7 +202,7 @@ class GameState:
                 self.loop_counter += 1
 
             pygame.display.update()
-            elapsed_time = self.my_clock.tick(20)
+            elapsed_time = self.my_clock.tick(FRAME_RATE)
 
     def print_credits(self):
         print("Thanks to Ryan Ward for helping me learn object oriented programming with this project.")

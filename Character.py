@@ -44,7 +44,7 @@ class Character(Mover):
         self.left_image.set_colorkey((0, 255, 0))
 
         # Used for movement.
-        self.speed = [.075, .075]   # pixels per millisecond
+        self.speed = [.1, .1]   # pixels per millisecond
         self.velocity = [0, 0]
 
         # Used to limit attacks per second.
@@ -76,6 +76,7 @@ class Character(Mover):
                 if not self.energy - weapon.energy_consume < 0:
                     self.timer = pygame.time.get_ticks()
                     self.energy -= weapon.energy_consume
+
                     if isinstance(weapon, S.Attack) and type(weapon) is not S.SplitShot or isinstance(weapon, S.FireStorm):
                         return weapon
                     # For Splitshot.

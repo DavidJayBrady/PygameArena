@@ -1,3 +1,12 @@
+'''
+Ability Ideas:
+    - Shield Charge: Increase movement speed, increase defense while running, consume energy, knockback.
+    - Lightning Throns: Orbit lightning balls around player, consume energy, do damage to surrounding enemies.
+    - Powershot: Stand still, charge up arrow, and fire. Big damage, pierce.
+'''
+FRAME_RATE = 20
+
+
 import pygame
 from pygame.locals import *
 
@@ -12,14 +21,14 @@ pygame.font.init()
 FONT = pygame.font.Font(None, 26)
 
 
-MELEE_COLOR = (220, 20, 60)
+MELEE_COLOR = (220, 50, 60)
 MELEE_INFO_COLOR = (220, 100, 120)
 
 RANGE_COLOR = (20, 200, 60)
-RANGE_INFO_COLOR = (80, 170, 110)
+RANGE_INFO_COLOR = (80, 170, 70)
 
-MAGIC_COLOR = (90, 140, 220)
-MAGIC_INFO_COLOR = (70, 120, 220)
+MAGIC_COLOR = (100, 180, 220)
+MAGIC_INFO_COLOR = (90, 140, 220)
 
 PASSIVE_COLOR = (200, 150, 100)
 PASSIVE_INFO_COLOR = (180, 160, 110)
@@ -29,6 +38,9 @@ def adjust(detail_box, x):
     return list(map(lambda x, y: x + y, x, detail_box))
 
 class Ability(pygame.sprite.Sprite):
+
+    player_stand_still = False
+
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
 
@@ -52,20 +64,18 @@ class ToughenUp(Ability):
     name_color = PASSIVE_COLOR
     info_color = PASSIVE_INFO_COLOR
 
-    def __init__(self):
+    def __init__(self, player_to_click, sprite_cord, from_player, ability_level):
         Ability.__init__(self)
 
     @staticmethod
-    def calc_damage(ability_level, from_player):
-        return None
+    def calc_hp(ability_level): # If I change this method, also change character recover method.
+        return 700 + (50 * ability_level)
 
     @staticmethod
-    def calc_cooldown(ability_level, from_player):
-        return None
+    def calc_hp_regen(ability_level): # If I change this method, also change character increment_maxes method.
+        return round((.1 + (.05 * ability_level) * FRAME_RATE), 1)
 
-    @staticmethod
-    def calc_energy_consume(ability_level, from_player):
-        return None
+
 
     @staticmethod
     def gather_statistics(type, ability_level, detail_box):
@@ -73,6 +83,8 @@ class ToughenUp(Ability):
         stats[FONT.render(type.name, True, type.name_color)] = adjust(detail_box, (10, 10))
         stats[FONT.render("Level: "+str(ability_level), True, type.info_color)] = adjust(detail_box, (130, 10))
         stats[FONT.render("Type: " +str(type.ability_type), True, type.info_color)] = adjust(detail_box, (215, 10))
+        stats[FONT.render("Endurance: "+str(type.calc_hp(ability_level)), True, type.info_color)] = adjust(detail_box, (10, 50))
+        stats[FONT.render("Regen: "+str(type.calc_hp_regen(ability_level)), True, type.info_color)] = adjust(detail_box, (160, 50))
         stats[FONT.render(type.description, True, type.info_color)] = adjust(detail_box, (10, 80))
         return stats
 
@@ -267,6 +279,7 @@ class Arrow(Attack):
     def calc_cooldown(ability_level, from_player):
         return 450 if from_player else 2500
 
+
 class SplitShot(Arrow):
 
     name = "SplitShot"
@@ -292,6 +305,14 @@ class SplitShot(Arrow):
         self.cooldown = self.arrow1.cooldown
 
         self.energy_consume = self.arrow1.energy_consume * 3
+
+
+class PowerShot(Arrow):
+
+    player_stand_still = True
+
+    def __init__(self, player_to_click, sprite_cord, from_player, ability_level):
+        Arrow.__init__(self, player_to_click, sprite_cord, from_player, ability_level)
 
 
 class Lightning(Arrow):
