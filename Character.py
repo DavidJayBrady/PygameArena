@@ -61,9 +61,9 @@ class Character(Mover):
         energy_bar_offset = [-570, -280]
         experience_bar_offset = [-200, 330]
 
-        self.healthbar = Bar(health_bar_offset, self.uses_caps, 'health')
-        self.energybar = Bar(energy_bar_offset, self.uses_caps, 'energy')
-        self.experiencebar = Bar(experience_bar_offset, self.uses_caps, 'experience')
+        self.healthbar = Bar(health_bar_offset, self.uses_caps, True, 'health')
+        self.energybar = Bar(energy_bar_offset, self.uses_caps, True, 'energy')
+        self.experiencebar = Bar(experience_bar_offset, self.uses_caps, True, 'experience')
 
     def attack(self, event_position, attack_type):
 

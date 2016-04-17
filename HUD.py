@@ -11,9 +11,10 @@ import Sword as S
 
 
 class Bar:
-    def __init__(self, offset, uses_caps, type: str):
+    def __init__(self, offset, uses_caps: bool, from_player: bool, type: str):
         self.offset = offset
         self.uses_caps = uses_caps
+        self.from_player = from_player
 
         shrink = lambda x: pygame.transform.smoothscale(x, [40, 40])
         self.left_cap = shrink(pygame.image.load('Health Bars/Left-Cap.png'))
@@ -31,21 +32,26 @@ class Bar:
         self.empty_bar = shrink(pygame.image.load('Health Bars/Empty-Health.png'))
 
     def draw_health_bar(self, screen, rect, current, max):
-
-        current_scale = int(current/2)
-        max_scale = int(max/2)
-
-        if self.uses_caps == True and (self.type == 'health' or self.type == 'energy'):
+        if self.uses_caps and (self.type == 'health' or self.type == 'energy') and self.from_player:
+            current_scale = int(current/2)
+            max_scale = int(max/2)
             self.blit_caps(screen, rect, current_scale, max_scale)
+
+        elif self.uses_caps and (self.type == 'health') and not self.from_player:
+            max_scale = 70
+            current_scale = int((current/max) * max_scale)
+            self.blit_caps(screen, rect, current_scale, max_scale)
+
         elif self.type == 'experience':
             max_scale = 770
             current_scale = int(((current/max) * max_scale))
             self.blit_caps(screen, rect, current_scale, max_scale)
         else:
-            health_percentage = int((current/max) * 60) # 60  is the number in the self.empty bar line
+            max_scale = 60
+            current_scale = int((current/max) * max_scale) # 60  is the number in the self.empty bar line
             self.left_cap_end = [rect.topleft[0] + self.offset[0], rect.topleft[1] + self.offset[1]]
-            self.bar = pygame.transform.smoothscale(self.bar, [health_percentage, 15])
-            self.empty_bar = pygame.transform.smoothscale(self.empty_bar, [60, 15])
+            self.bar = pygame.transform.smoothscale(self.bar, [current_scale, 15])
+            self.empty_bar = pygame.transform.smoothscale(self.empty_bar, [max_scale, 15])
 
         if current > 0 or self.uses_caps:
             screen.blit(self.empty_bar, self.left_cap_end)
@@ -88,7 +94,7 @@ class AbilityManager:
         self.ability_names = {S.ToughenUp: "Toughen Up", S.Attack: "Strike", S.Sweep: "Sweep", S.Arrow: 'SingleShot',
                               S.SplitShot: "Splitshot", S.Lightning: "Lightning", S.FireStorm: "FireStorm"}
 
-        self.ability_points = 10
+        self.ability_points = 7
 
         # Used to draw the ability menu popup. Position is determined by menu_rects. 1 is bottom left, 2 is right of 1.
         self.ability_list = [S.Attack, S.Sweep, S.Arrow, S.SplitShot,

@@ -6,7 +6,6 @@ Ability Ideas:
 '''
 FRAME_RATE = 20
 
-
 import pygame
 from pygame.locals import *
 
@@ -367,7 +366,7 @@ class FireStorm(Ability):
         self.image = pygame.transform.smoothscale(pygame.image.load('Other Art/LavaGround.png'), [120, 120])
         self.image.set_colorkey((0, 0, 0))
 
-        if player_to_click.length() > 500:
+        if player_to_click.length() > 350:
             return None
 
         self.from_player = from_player

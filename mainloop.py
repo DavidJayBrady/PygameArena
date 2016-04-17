@@ -1,9 +1,5 @@
-global LEFT
 LEFT = 1
-global RIGHT
 RIGHT = 3
-
-
 
 import pygame
 from pygame.locals import *
@@ -26,14 +22,15 @@ from Sword import FRAME_RATE
 Some things to take a next step:
     - Equipment
         - Handling inventory
-            - Sort of Skyrim STyle
+            - Sort of Skyrim Style
                 - Menu on right side of screen above experirence bar, 3 tabs (main hand, armor, offhand)
                 - Items will be represented as text, can have picture show up when scrolling over.
     - Bug Fixes
         - Monsters should always be above the LavaGround.
-        - Monsters should not block friendly arrows.
     - Make this games positions not hardcoded. Only set for 1280 by 800 pixels right now.
 '''
+
+# Used for determining if MOUSEBUTTONDOWN was a left or right click.
 
 class PgGroup(pygame.sprite.Group):
     def __init__(self, *args):
@@ -75,8 +72,8 @@ class GameState:
 
         self.all_but_background = PgGroup((self.character, self.walls))
 
-        self.monsters = Monster.spawn_monsters(self.character, self.walls, ((ChampionMeleeMonster, 10), (Monster, 20),
-                                                                            (RangeMonster, 20)))
+        self.monsters = Monster.spawn_monsters(self.character, self.walls, ((ChampionMeleeMonster, 15), (Monster, 30),
+                                                                            (RangeMonster, 25)))
 
         self.ability_manager = AbilityManager()
 
