@@ -146,12 +146,15 @@ class GameState:
                             self.all_but_background.add(weapon) # For collisions
                             self.all_sprites.add(weapon) # For movement
                 elif event.type == MOUSEBUTTONDOWN and event.button == RIGHT:
+                    test_index = self.ability_manager.ability_image_clicked(event.pos)
                     if self.ability_manager.menu_up:
-                        test_index = self.ability_manager.menu_ability_clicked(event.pos)
-                        if test_index[0] and self.ability_manager.ability_points > 0:
-                            self.character.ability_levels[test_index[1]] += 1
-                            self.ability_manager.ability_points -= 1
-                            self.character.increment_maxes()
+                        test_index2 = self.ability_manager.menu_ability_clicked(event.pos)
+                        test_index = test_index2 if test_index2[0] else test_index
+                    if test_index[0] and self.ability_manager.ability_points > 0:
+                        self.character.ability_levels[test_index[1]] += 1
+                        self.ability_manager.ability_points -= 1
+                        self.character.increment_maxes()
+
             b = pygame.time.get_ticks() - a
             self.screen.fill((0, 0, 0))
 

@@ -148,7 +148,7 @@ class AbilityManager:
         for index, ability_square in enumerate(self.ability_rect_list):
             if ability_square.collidepoint(click_pos):
                 self.ability_to_change = index
-                return True
+                return (True, self.ability_hotkeys[index])
 
     def menu_ability_clicked(self, click_pos: tuple):
         for index in range(len(self.menu_rects)):
