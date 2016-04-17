@@ -9,6 +9,7 @@ import pygame
 from pygame.locals import *
 from sys import exit
 
+from Collisions import Collider
 from Mover import Mover
 from Background import Background
 from Background import Wall
@@ -166,7 +167,7 @@ class GameState:
             self.all_sprites.add(monster_weapons)
             c = pygame.time.get_ticks() - (b + a)
             # Collisions, must be after attack so can check for collisions between sword/monser/player.
-            Mover.check_collision_group(self.all_but_background, self.screen)
+            Collider.check_collision_group(self.all_but_background, self.screen)
             d = pygame.time.get_ticks() - (c + b + a)
             # Move and show everything.
             self.all_sprites.update(self.character.velocity, self.character.rect)
