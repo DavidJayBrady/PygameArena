@@ -4,7 +4,7 @@ Ability Ideas:
     - Lightning Throns: Orbit lightning balls around player, consume energy, do damage to surrounding enemies.
     - Powershot: Stand still, charge up arrow, and fire. Big damage, pierce.
 '''
-FRAME_RATE = 20
+FRAME_RATE = 15
 
 import pygame
 from pygame.locals import *

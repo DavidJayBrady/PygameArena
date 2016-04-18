@@ -20,7 +20,7 @@ class Character(Mover):
         scale_factor = [64, 64]
         enlarge = lambda x: pygame.transform.smoothscale(x, scale_factor)
 
-        characters = SpriteSheet('instant_dungeon_artpack/By JosВ Luis Peirв Lima/players-mages.png')
+        characters = SpriteSheet('instant_dungeon_artpack/By Jos Luis Peir Lima/players-mages.png')
         self.image = enlarge(characters.image_at([64, 0, 16, 16])).convert() # pygame.Surface
         self.rect = self.image.get_rect() # pygame.Rect
 

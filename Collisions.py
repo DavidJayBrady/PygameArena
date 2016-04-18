@@ -2,8 +2,23 @@ import pygame
 from Monster import Monster
 from Sword import Arrow
 
+from Character import Character
+
 class Collider:
 
+    @staticmethod
+    def check_collision_group(most_sprites, screen):
+        single = pygame.sprite.GroupSingle()
+        for sprite in most_sprites:
+            most_sprites.remove(sprite)
+            single.add(sprite)
+
+            collided_sprites_dict = pygame.sprite.groupcollide(single, most_sprites, False, False)
+
+            most_sprites.add(sprite)
+
+
+'''
     @staticmethod
     def check_collision_group(most_sprites: pygame.sprite.Group, screen):
         for sprite in most_sprites:
@@ -22,10 +37,10 @@ class Collider:
                         most_sprites.remove(sprite2)
                         removed_friendlies.append(sprite2)
 
-
             collided_sprite = pygame.sprite.spritecollideany(sprite, most_sprites)
             most_sprites.add(removed_friendlies)
             if collided_sprite is not None:
                 sprite.handle_collision(collided_sprite)
             most_sprites.add(sprite)
 
+'''
