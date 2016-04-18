@@ -150,10 +150,11 @@ class GameState:
                     if self.ability_manager.menu_up:
                         test_index2 = self.ability_manager.menu_ability_clicked(event.pos)
                         test_index = test_index2 if test_index2[0] else test_index
-                    if test_index[0] and self.ability_manager.ability_points > 0:
-                        self.character.ability_levels[test_index[1]] += 1
-                        self.ability_manager.ability_points -= 1
-                        self.character.increment_maxes()
+                    if test_index is not None:
+                        if test_index[0] and self.ability_manager.ability_points > 0:
+                            self.character.ability_levels[test_index[1]] += 1
+                            self.ability_manager.ability_points -= 1
+                            self.character.increment_maxes()
 
             b = pygame.time.get_ticks() - a
             self.screen.fill((0, 0, 0))

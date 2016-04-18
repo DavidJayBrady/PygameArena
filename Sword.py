@@ -112,7 +112,7 @@ class Attack(Ability):
 
         self.damage = self.calc_damage(ability_level, from_player)
         self.cooldown = self.calc_cooldown(ability_level, from_player)
-        self.energy_consume = 10
+        self.energy_consume = Attack.calc_energy_consume(ability_level, from_player)
 
     def find_angle(self, unit_vect: pygame.math.Vector2) -> int:  # Make better name sometime
         try:
@@ -179,7 +179,7 @@ class Attack(Ability):
 
     @staticmethod
     def calc_energy_consume(ability_level, from_player):
-        return 10
+        return 15
 
 
 class Sweep(Attack):
@@ -197,7 +197,7 @@ class Sweep(Attack):
         self.dead = False
 
         self.damage = 10 + (ability_level * 5)
-        self.energy_consume = 25
+        self.energy_consume = Sweep.calc_energy_consume(ability_level, True)
         self.cooldown = 800
 
         # Makes Sweep start right at click.
@@ -224,7 +224,7 @@ class Sweep(Attack):
 
     @staticmethod
     def calc_energy_consume(ability_level, from_player):
-        return 25
+        return 30
 
 
 class Arrow(Attack):
@@ -248,6 +248,8 @@ class Arrow(Attack):
         self.cooldown = 450 if from_player else 2500
 
         self.damage = 10 + (ability_level * 5)
+
+        self.energy_consume = Arrow.calc_energy_consume(ability_level, True)
 
     def load_transform_image(self):
         self.image = pygame.image.load('Other Art/arrow.png')
@@ -277,6 +279,10 @@ class Arrow(Attack):
     @staticmethod
     def calc_cooldown(ability_level, from_player):
         return 450 if from_player else 2500
+
+    @staticmethod
+    def calc_energy_consume(ability_level, from_player):
+        return 20
 
 
 class SplitShot(Arrow):
@@ -332,6 +338,8 @@ class Lightning(Arrow):
         self.x_move_ratio = self.unit_vect[0] * 70
         self.y_move_ratio = self.unit_vect[1] * 70
 
+        self.energy_consume = Lightning.calc_energy_consume(ability_level, True)
+
     def load_transform_image(self):
         self.image = pygame.image.load('Other Art/Lightning.jpg')
         self.image = pygame.transform.smoothscale(self.image, [80, 48])
@@ -349,7 +357,7 @@ class Lightning(Arrow):
 
     @staticmethod
     def calc_energy_consume(ability_level, from_player):
-        return 10
+        return 15
 
 
 class FireStorm(Ability):
@@ -414,7 +422,7 @@ class FireStorm(Ability):
 
     @staticmethod
     def calc_energy_consume(ability_level, from_player):
-        return 30
+        return 35
 
 # Spell idea, put lightning thorns around player.
 # So that walking around a monster would do damage, or weird armor buff,

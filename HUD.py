@@ -94,7 +94,7 @@ class AbilityManager:
         self.ability_names = {S.ToughenUp: "Toughen Up", S.Attack: "Strike", S.Sweep: "Sweep", S.Arrow: 'SingleShot',
                               S.SplitShot: "Splitshot", S.Lightning: "Lightning", S.FireStorm: "FireStorm"}
 
-        self.ability_points = 7
+        self.ability_points = 3
 
         # Used to draw the ability menu popup. Position is determined by menu_rects. 1 is bottom left, 2 is right of 1.
         self.ability_list = [S.Attack, S.Sweep, S.Arrow, S.SplitShot,
@@ -136,7 +136,7 @@ class AbilityManager:
 
         if self.ability_points > 0:
             extra_text = ' ability point to spend' if self.ability_points == 1 else ' ability points to spend'
-            screen.blit(self.font.render(str(self.ability_points) + extra_text, True, (50, 150, 150)),[50, 140])
+            screen.blit(self.font.render(str(self.ability_points) + extra_text, True, (120, 200, 160)),[50, 140])
 
 
         self._draw_abilities(screen, self.ability_menu_background_image, self.ability_background_rect,
