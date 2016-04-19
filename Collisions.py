@@ -15,6 +15,9 @@ class Collider:
 
             collided_sprites_dict = pygame.sprite.groupcollide(single, most_sprites, False, False)
 
+            if len(collided_sprites_dict) > 0:
+                sprite.handle_collision(collided_sprites_dict[sprite])
+
             most_sprites.add(sprite)
 
 

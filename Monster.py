@@ -151,13 +151,14 @@ class Monster(Mover):
 
         return monster_list
 
-    def handle_collision(self, collided_sprite):
+    def handle_collision(self, collided_sprites):
         ''' If collided with any sort of attack, take damage. Else, bounce off thing monster collided with. '''
-        if (isinstance(collided_sprite, Attack) or isinstance(collided_sprite, FireStorm)) and collided_sprite.from_player:
-            self.take_damage(collided_sprite.damage)
-        else:
-            self.rect = self.rect.move(-self.velocity[0], -self.velocity[1])
-            self.walk_counter += 100
+        for sprite in collided_sprites:
+            if (isinstance(sprite, Attack) or isinstance(sprite, FireStorm)) and sprite.from_player:
+                self.take_damage(sprite.damage)
+            else:
+                self.rect = self.rect.move(-self.velocity[0], -self.velocity[1])
+                self.walk_counter += 100
 
     def take_damage(self, damage: int):
         self.health -= damage

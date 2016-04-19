@@ -99,13 +99,14 @@ class Character(Mover):
         elif Mover.set_right:
             self.image = self.right_image
 
-    def handle_collision(self, collided_sprite):
-        if not isinstance(collided_sprite, S.Attack) and not isinstance(collided_sprite, S.FireStorm):
+    def handle_collision(self, collided_sprites):
+        for sprite in collided_sprites:
+            if isinstance(sprite, Mover):
                 self.velocity = list(map(lambda x : -2 * x, self.velocity))
 
-        if isinstance(collided_sprite, S.Attack) or isinstance(collided_sprite, S.FireStorm):
-            if not collided_sprite.from_player:
-                self.take_damage(collided_sprite.damage)
+            if isinstance(sprite, S.Attack) or isinstance(sprite, S.FireStorm):
+                if not sprite.from_player:
+                    self.take_damage(sprite.damage)
 
     def calc_velocity(self, elapsed_time):
         self.velocity = [0, 0]

@@ -268,9 +268,11 @@ class Arrow(Attack):
         '''
         self.rect.move_ip(character_velocity[0], character_velocity[1])
 
-    def handle_collision(self, collided_sprite):
-        if not isinstance(collided_sprite, Arrow):
-            self.dead = True
+    def handle_collision(self, collided_sprites):
+        for sprite in collided_sprites:
+            if not isinstance(sprite, Arrow):
+                self.dead = True
+                break
 
     @staticmethod
     def calc_damage(ability_level, from_player):
@@ -309,7 +311,7 @@ class SplitShot(Arrow):
 
         self.cooldown = self.arrow1.cooldown
 
-        self.energy_consume = self.arrow1.energy_consume * 3
+        self.energy_consume = self.arrow1.energy_consume * 2.5
 
 
 class PowerShot(Arrow):
