@@ -3,17 +3,11 @@ from pygame.locals import *
 
 import Sword as S
 
-# REINIT EVERY TIME ABILITY LEVELS UP TO RECALCULATE THE CLASS ATTRIBUTES
-
-
-# How to handle the difference in player ability levels and monster ability levels
-#   Could have two separate variables.
-
-
 class Bar:
-    def __init__(self, offset, uses_caps, type: str):
+    def __init__(self, offset, uses_caps: bool, from_player: bool, type: str):
         self.offset = offset
         self.uses_caps = uses_caps
+        self.from_player = from_player
 
         shrink = lambda x: pygame.transform.smoothscale(x, [40, 40])
         self.left_cap = shrink(pygame.image.load('Health Bars/Left-Cap.png'))
@@ -31,21 +25,26 @@ class Bar:
         self.empty_bar = shrink(pygame.image.load('Health Bars/Empty-Health.png'))
 
     def draw_health_bar(self, screen, rect, current, max):
-
-        current_scale = int(current/2)
-        max_scale = int(max/2)
-
-        if self.uses_caps == True and (self.type == 'health' or self.type == 'energy'):
+        if self.uses_caps and (self.type == 'health' or self.type == 'energy') and self.from_player:
+            current_scale = int(current/2)
+            max_scale = int(max/2)
             self.blit_caps(screen, rect, current_scale, max_scale)
+
+        elif self.uses_caps and (self.type == 'health') and not self.from_player:
+            max_scale = 70
+            current_scale = int((current/max) * max_scale)
+            self.blit_caps(screen, rect, current_scale, max_scale)
+
         elif self.type == 'experience':
             max_scale = 770
             current_scale = int(((current/max) * max_scale))
             self.blit_caps(screen, rect, current_scale, max_scale)
         else:
-            health_percentage = int((current/max) * 60) # 60  is the number in the self.empty bar line
+            max_scale = 60
+            current_scale = int((current/max) * max_scale) # 60  is the number in the self.empty bar line
             self.left_cap_end = [rect.topleft[0] + self.offset[0], rect.topleft[1] + self.offset[1]]
-            self.bar = pygame.transform.smoothscale(self.bar, [health_percentage, 15])
-            self.empty_bar = pygame.transform.smoothscale(self.empty_bar, [60, 15])
+            self.bar = pygame.transform.smoothscale(self.bar, [current_scale, 15])
+            self.empty_bar = pygame.transform.scale(self.empty_bar, [max_scale, 15])
 
         if current > 0 or self.uses_caps:
             screen.blit(self.empty_bar, self.left_cap_end)
@@ -58,8 +57,8 @@ class Bar:
         screen.blit(self.left_cap, left_cap_start)
         screen.blit(self.right_cap, [max_scale + self.left_cap_end[0], self.left_cap_end[1]])
 
-        self.bar = pygame.transform.smoothscale(self.bar, [(current_scale if current_scale != 0 else 1), 40])
-        self.empty_bar = pygame.transform.smoothscale(self.empty_bar, [max_scale, 40])
+        self.bar = pygame.transform.scale(self.bar, [(current_scale if current_scale != 0 else 1), 40])
+        self.empty_bar = pygame.transform.scale(self.empty_bar, [max_scale, 40])
 
 class AbilityManager:
     def __init__(self):
@@ -88,7 +87,7 @@ class AbilityManager:
         self.ability_names = {S.ToughenUp: "Toughen Up", S.Attack: "Strike", S.Sweep: "Sweep", S.Arrow: 'SingleShot',
                               S.SplitShot: "Splitshot", S.Lightning: "Lightning", S.FireStorm: "FireStorm"}
 
-        self.ability_points = 10
+        self.ability_points = 3
 
         # Used to draw the ability menu popup. Position is determined by menu_rects. 1 is bottom left, 2 is right of 1.
         self.ability_list = [S.Attack, S.Sweep, S.Arrow, S.SplitShot,
@@ -130,7 +129,7 @@ class AbilityManager:
 
         if self.ability_points > 0:
             extra_text = ' ability point to spend' if self.ability_points == 1 else ' ability points to spend'
-            screen.blit(self.font.render(str(self.ability_points) + extra_text, True, (50, 150, 150)),[50, 140])
+            screen.blit(self.font.render(str(self.ability_points) + extra_text, True, (120, 200, 160)),[50, 140])
 
 
         self._draw_abilities(screen, self.ability_menu_background_image, self.ability_background_rect,
@@ -142,7 +141,7 @@ class AbilityManager:
         for index, ability_square in enumerate(self.ability_rect_list):
             if ability_square.collidepoint(click_pos):
                 self.ability_to_change = index
-                return True
+                return (True, self.ability_hotkeys[index])
 
     def menu_ability_clicked(self, click_pos: tuple):
         for index in range(len(self.menu_rects)):

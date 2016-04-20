@@ -20,7 +20,7 @@ class Monster(Mover):
 
         self.exp_value = 100
 
-        self.level = 1
+        self.level = 2
 
         self.scale_factor = [64, 64]
 
@@ -33,7 +33,7 @@ class Monster(Mover):
         self.load_images(monster_images)
 
         self.rect = self.image.get_rect() # pygame.Rect
-        self.rect = self.rect.move([randrange(1, 3670), randrange(1, 2160)]) # Random spawn location
+        self.rect = self.rect.move([randrange(700, 3670), randrange(700, 2160)]) # Random spawn location
 
         self.direction = randrange(1, 9) # Refer to Mover.update method
         self.walk_counter = 0            # Keep monsters from changing directions constantly
@@ -42,8 +42,8 @@ class Monster(Mover):
         self.speed = [2, 2]
         self.velocity = pygame.math.Vector2(self.speed)
 
-        self.max_health = 90 + (10 * self.level)
-        self.health = 90 + (10 * self.level)
+        self.health = 90 + (25 * self.level)
+        self.max_health = self.health
 
         self.timer = pygame.time.get_ticks()
 
@@ -53,7 +53,7 @@ class Monster(Mover):
 
         self.offset = [5, -15]
 
-        self.healthbar = Bar(self.offset, self.uses_caps, 'health')
+        self.healthbar = Bar(self.offset, self.uses_caps, False, 'health')
 
     def load_images(self, monster_images):
         self.down_image = self.enlarge(monster_images[0]).convert()
@@ -141,9 +141,9 @@ class Monster(Mover):
         :return: Monsters!
         '''
         monster_list = []
-        for monster_type, number in monster_info:
+        for monster_class, number in monster_info:
             for i in range(number - 1):
-                monster = monster_type()
+                monster = monster_class()
                 if pygame.sprite.spritecollideany(monster, monster_list) == None and\
                                 pygame.sprite.collide_rect(monster, character) == False and\
                                     pygame.sprite.spritecollideany(monster, walls) == None:
@@ -151,13 +151,14 @@ class Monster(Mover):
 
         return monster_list
 
-    def handle_collision(self, collided_sprite):
+    def handle_collision(self, collided_sprites):
         ''' If collided with any sort of attack, take damage. Else, bounce off thing monster collided with. '''
-        if (isinstance(collided_sprite, Attack) or isinstance(collided_sprite, FireStorm)) and collided_sprite.from_player:
-            self.take_damage(collided_sprite.damage)
-        else:
-            self.rect = self.rect.move(-self.velocity[0], -self.velocity[1])
-            self.walk_counter += 100
+        for sprite in collided_sprites:
+            if (isinstance(sprite, Attack) or isinstance(sprite, FireStorm)) and sprite.from_player:
+                self.take_damage(sprite.damage)
+            else:
+                self.rect = self.rect.move(-self.velocity[0], -self.velocity[1])
+                self.walk_counter += 100
 
     def take_damage(self, damage: int):
         self.health -= damage
@@ -172,6 +173,8 @@ class Monster(Mover):
 class ChampionMeleeMonster(Monster):
     def __init__(self):
         Monster.__init__(self)
+
+        self.level = 3
 
         self.exp_value = 250
 
@@ -188,19 +191,25 @@ class ChampionMeleeMonster(Monster):
         self.speed = [3, 3]
         self.velocity = pygame.math.Vector2(self.speed)
 
-        self.max_health = 150
-        self.health = 150
+        self.health = 150 + (30 * self.level)
+        self.max_health = 150 + (30 * self.level)
 
         self.cooldown = 500
 
         self.uses_caps = True
 
-        self.offset = [-40, -30] # Sometime, make this change with monster health,
-                                #  and dont let monsters have crazy health bars like the player
+        self.offset = (-40, -30)
 
-        self.healthbar = Bar(self.offset, self.uses_caps, 'health')
+        self.healthbar = Bar(self.offset, self.uses_caps, False, 'health')
 
 class RangeMonster(Monster):
+
+    detect_range = 800
+    attack_range = 450
+    run_to_range = 450
+    run_away_range = 200
+
+
     def __init__(self):
         Monster.__init__(self)
         monsters = SpriteSheet('instant_dungeon_artpack/By Scott Matott/monsters.png')
@@ -216,9 +225,6 @@ class RangeMonster(Monster):
         monster_images = monsters.load_strip([0, 64, 16, 16, 8], 8)
         self.load_images(monster_images)
 
-        self.rect = self.image.get_rect() # pygame.Rect
-        self.rect = self.rect.move([randrange(1, 3670), randrange(1, 2160)]) # Random spawn location
-
         self.direction = randrange(1, 9) # Refer to Mover.update method
         self.walk_counter = 0            # Keep monsters from changing directions constantly
 
@@ -226,19 +232,23 @@ class RangeMonster(Monster):
         self.speed = [2, 2]
         self.velocity = pygame.math.Vector2(self.speed)
 
-        self.max_health = 80
-        self.health = 80
+        self.health = 80 + (10 * self.level)
+        self.max_health = self.health
 
     def update(self, char_speed, char_rect):
         ''' Overriding for range monster to maintain a distance from the player. '''
         Mover.update(self, char_speed, char_rect)
-        if not self.player_around(char_rect, 900, '<'):
-            self.walk_random()
-        elif self.player_around(char_rect, 450, '>') and self.player_around(char_rect, 900, '<'):
+
+        # Walk to player if more than 800 pixels away.
+        if self.player_around(char_rect, RangeMonster.detect_range, '>') and self.player_around(char_rect, 900, '<'):
             self.walk_to_player(char_rect)
 
-        elif self.player_around(char_rect, 450, '<'):
+        # Walk from player if less than 150 pixels away.
+        if self.player_around(char_rect, 150, '<'):
             self.walk_from_player(char_rect, char_speed)
+
+        else:
+            self.walk_random()
 
         self.change_image()
         self.rect = self.rect.move(self.velocity)
@@ -250,7 +260,7 @@ class RangeMonster(Monster):
         self.velocity = list(map(lambda speed, unit: speed * unit, unit_vect, self.speed))
 
     def attack(self, char_cord):
-        if self.player_around(char_cord, 600, '<'):
+        if self.player_around(char_cord, RangeMonster.attack_range, '<'):
             monster_to_player = pygame.math.Vector2(list(map(lambda x, y: x - y,
                                                              list(char_cord)[:2], self.rect.center)))
             unit_vect = monster_to_player.normalize()

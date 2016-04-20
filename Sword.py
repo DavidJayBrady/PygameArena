@@ -4,8 +4,7 @@ Ability Ideas:
     - Lightning Throns: Orbit lightning balls around player, consume energy, do damage to surrounding enemies.
     - Powershot: Stand still, charge up arrow, and fire. Big damage, pierce.
 '''
-FRAME_RATE = 20
-
+FRAME_RATE = 15
 
 import pygame
 from pygame.locals import *
@@ -51,7 +50,7 @@ class Ability(pygame.sprite.Sprite):
         stats[FONT.render("Level: "+str(ability_level), True, type.info_color)] = adjust(detail_box, (110, 10))
         stats[FONT.render("Type: " +str(type.ability_type), True, type.info_color)] = adjust(detail_box, (250, 50))
         stats[FONT.render("Damage: "+str(type.calc_damage(ability_level, True)), True, type.info_color)] = adjust(detail_box, (225, 10))
-        stats[FONT.render("Energy: "+str(type.calc_energy_consume(ability_level, True)), True, type.info_color)] = adjust(detail_box, (10, 50))
+        stats[FONT.render("Energy: "+str(round(type.calc_energy_consume(ability_level, True))), True, type.info_color)] = adjust(detail_box, (10, 50))
         stats[FONT.render("Cooldown: "+str(type.calc_cooldown(ability_level, True)), True, type.info_color)] = adjust(detail_box, (110, 50))
         stats[FONT.render(type.description, True, type.info_color)] = adjust(detail_box, (10, 80))
         return stats
@@ -113,7 +112,7 @@ class Attack(Ability):
 
         self.damage = self.calc_damage(ability_level, from_player)
         self.cooldown = self.calc_cooldown(ability_level, from_player)
-        self.energy_consume = 10
+        self.energy_consume = Attack.calc_energy_consume(ability_level, from_player)
 
     def find_angle(self, unit_vect: pygame.math.Vector2) -> int:  # Make better name sometime
         try:
@@ -180,7 +179,7 @@ class Attack(Ability):
 
     @staticmethod
     def calc_energy_consume(ability_level, from_player):
-        return 10
+        return 15
 
 
 class Sweep(Attack):
@@ -198,7 +197,7 @@ class Sweep(Attack):
         self.dead = False
 
         self.damage = 10 + (ability_level * 5)
-        self.energy_consume = 25
+        self.energy_consume = Sweep.calc_energy_consume(ability_level, True)
         self.cooldown = 800
 
         # Makes Sweep start right at click.
@@ -225,7 +224,7 @@ class Sweep(Attack):
 
     @staticmethod
     def calc_energy_consume(ability_level, from_player):
-        return 25
+        return 30
 
 
 class Arrow(Attack):
@@ -250,6 +249,8 @@ class Arrow(Attack):
 
         self.damage = 10 + (ability_level * 5)
 
+        self.energy_consume = Arrow.calc_energy_consume(ability_level, True)
+
     def load_transform_image(self):
         self.image = pygame.image.load('Other Art/arrow.png')
         self.image = pygame.transform.smoothscale(self.image, [64, 32])
@@ -267,9 +268,11 @@ class Arrow(Attack):
         '''
         self.rect.move_ip(character_velocity[0], character_velocity[1])
 
-    def handle_collision(self, collided_sprite):
-        if not isinstance(collided_sprite, Arrow):
-            self.dead = True
+    def handle_collision(self, collided_sprites):
+        for sprite in collided_sprites:
+            if self.from_player != sprite.from_player:
+                self.dead = True
+                break
 
     @staticmethod
     def calc_damage(ability_level, from_player):
@@ -278,6 +281,10 @@ class Arrow(Attack):
     @staticmethod
     def calc_cooldown(ability_level, from_player):
         return 450 if from_player else 2500
+
+    @staticmethod
+    def calc_energy_consume(ability_level, from_player):
+        return 20
 
 
 class SplitShot(Arrow):
@@ -304,7 +311,11 @@ class SplitShot(Arrow):
 
         self.cooldown = self.arrow1.cooldown
 
-        self.energy_consume = self.arrow1.energy_consume * 3
+        self.energy_consume = SplitShot.calc_energy_consume(ability_level, from_player)
+
+    @staticmethod
+    def calc_energy_consume(ability_level, from_player):
+        return Arrow.calc_energy_consume(ability_level, from_player) * 2.5
 
 
 class PowerShot(Arrow):
@@ -333,6 +344,8 @@ class Lightning(Arrow):
         self.x_move_ratio = self.unit_vect[0] * 70
         self.y_move_ratio = self.unit_vect[1] * 70
 
+        self.energy_consume = Lightning.calc_energy_consume(ability_level, True)
+
     def load_transform_image(self):
         self.image = pygame.image.load('Other Art/Lightning.jpg')
         self.image = pygame.transform.smoothscale(self.image, [80, 48])
@@ -350,7 +363,7 @@ class Lightning(Arrow):
 
     @staticmethod
     def calc_energy_consume(ability_level, from_player):
-        return 10
+        return 15
 
 
 class FireStorm(Ability):
@@ -364,7 +377,10 @@ class FireStorm(Ability):
     def __init__(self, player_to_click, sprite_cord, from_player, ability_level):
         pygame.sprite.Sprite.__init__(self)
 
-        self.image = pygame.transform.smoothscale(pygame.image.load('Other Art/LavaGround.png'), [120, 120])
+        width = 120
+        height = 120
+
+        self.image = pygame.transform.smoothscale(pygame.image.load('Other Art/LavaGround.png'), [width, height])
         self.image.set_colorkey((0, 0, 0))
 
         if player_to_click.length() > 500:
@@ -372,8 +388,8 @@ class FireStorm(Ability):
 
         self.from_player = from_player
 
-        # 608, 368 is Center of character
-        self.rect = Rect(list(map(lambda x, y: x + y, (608, 368), player_to_click)) + [64, 64])
+        # 608, 368 is Center of character. Subtract 32 to both since the width/height of FireStorm is 64.
+        self.rect = Rect(list(map(lambda x, y: x + y, (608- width/2, 368-height/2), player_to_click)) + [width, height])
 
         self.cooldown = FireStorm.calc_cooldown(ability_level, from_player)
 
@@ -415,7 +431,19 @@ class FireStorm(Ability):
 
     @staticmethod
     def calc_energy_consume(ability_level, from_player):
-        return 30
+        return 35
+
+    @staticmethod
+    def gather_statistics(type, ability_level, detail_box):
+        stats = {}
+        stats[FONT.render(type.name, True, type.name_color)] = adjust(detail_box, (10, 10))
+        stats[FONT.render("Level: "+str(ability_level), True, type.info_color)] = adjust(detail_box, (110, 10))
+        stats[FONT.render("Type: " +str(type.ability_type), True, type.info_color)] = adjust(detail_box, (250, 50))
+        stats[FONT.render("Damage: "+str(type.calc_damage(ability_level, True)), True, type.info_color)] = adjust(detail_box, (225, 10))
+        stats[FONT.render("Energy: "+str(round(type.calc_energy_consume(ability_level, True))), True, type.info_color)] = adjust(detail_box, (10, 50))
+        stats[FONT.render("Cooldown: "+str(type.calc_cooldown(ability_level, True)), True, type.info_color)] = adjust(detail_box, (110, 50))
+        stats[FONT.render(type.description, True, type.info_color)] = adjust(detail_box, (10, 80))
+        return stats
 
 # Spell idea, put lightning thorns around player.
 # So that walking around a monster would do damage, or weird armor buff,

@@ -15,12 +15,12 @@ class Character(Mover):
         self.ability_levels = {S.Attack: 1, S.Sweep: 1, S.Arrow: 1, S.SplitShot: 1, S.Lightning: 1,
                                S.FireStorm: 1, S.ToughenUp: 1}
 
-        self.is_player = True
+        self.from_player = True
 
         scale_factor = [64, 64]
         enlarge = lambda x: pygame.transform.smoothscale(x, scale_factor)
 
-        characters = SpriteSheet('instant_dungeon_artpack/By JosВ Luis Peirв Lima/players-mages.png')
+        characters = SpriteSheet('instant_dungeon_artpack/By Jos Luis Peir Lima/players-mages.png')
         self.image = enlarge(characters.image_at([64, 0, 16, 16])).convert() # pygame.Surface
         self.rect = self.image.get_rect() # pygame.Rect
 
@@ -61,9 +61,9 @@ class Character(Mover):
         energy_bar_offset = [-570, -280]
         experience_bar_offset = [-200, 330]
 
-        self.healthbar = Bar(health_bar_offset, self.uses_caps, 'health')
-        self.energybar = Bar(energy_bar_offset, self.uses_caps, 'energy')
-        self.experiencebar = Bar(experience_bar_offset, self.uses_caps, 'experience')
+        self.healthbar = Bar(health_bar_offset, self.uses_caps, True, 'health')
+        self.energybar = Bar(energy_bar_offset, self.uses_caps, True, 'energy')
+        self.experiencebar = Bar(experience_bar_offset, self.uses_caps, True, 'experience')
 
     def attack(self, event_position, attack_type):
 
@@ -99,13 +99,14 @@ class Character(Mover):
         elif Mover.set_right:
             self.image = self.right_image
 
-    def handle_collision(self, collided_sprite):
-        if not isinstance(collided_sprite, S.Attack) and not isinstance(collided_sprite, S.FireStorm):
+    def handle_collision(self, collided_sprites):
+        for sprite in collided_sprites:
+            if isinstance(sprite, Mover):
                 self.velocity = list(map(lambda x : -2 * x, self.velocity))
 
-        if isinstance(collided_sprite, S.Attack) or isinstance(collided_sprite, S.FireStorm):
-            if not collided_sprite.from_player:
-                self.take_damage(collided_sprite.damage)
+            if isinstance(sprite, S.Attack) or isinstance(sprite, S.FireStorm):
+                if not sprite.from_player:
+                    self.take_damage(sprite.damage)
 
     def calc_velocity(self, elapsed_time):
         self.velocity = [0, 0]
@@ -133,7 +134,7 @@ class Character(Mover):
         if self.health < self.max_health:
             self.health += .1 + (.05 * self.ability_levels[S.ToughenUp])
         if self.energy < self.max_energy:
-            self.energy += 1
+            self.energy += 2.5
 
     def level_up(self):
         if self.experience > self.level_experience:

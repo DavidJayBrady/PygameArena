@@ -1,13 +1,11 @@
 import pygame
 from pygame.locals import *
 
-from Sword import Arrow
-from Sword import FireStorm
 
 class Mover(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.is_player = False
+        self.from_player = False
 
     set_up = False     # Booleans used for character movement
     set_left = False
@@ -38,5 +36,3 @@ class Mover(pygame.sprite.Sprite):
         :action: Move all rectangles according to input and player speed.
         '''
         self.rect.move_ip(character_velocity[0], character_velocity[1])
-
-
