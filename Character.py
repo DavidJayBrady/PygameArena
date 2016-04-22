@@ -134,7 +134,7 @@ class Character(Mover):
         if self.health < self.max_health:
             self.health += .1 + (.05 * self.ability_levels[S.ToughenUp])
         if self.energy < self.max_energy:
-            self.energy += 2.5
+            self.energy += 1
 
     def level_up(self):
         if self.experience > self.level_experience:

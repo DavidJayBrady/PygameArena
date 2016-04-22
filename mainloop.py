@@ -58,13 +58,6 @@ class PgGroup(pygame.sprite.Group):
         pygame.sprite.Group.__init__(self, *args)
 
     @staticmethod
-    def update_attacks(all_sprites):
-        for sprite in all_sprites:
-            if isinstance(sprite, Attack) or isinstance(sprite, FireStorm):
-                sprite.weapon_update()
-
-
-    @staticmethod
     def monster_attack(monsters: 'PgGroup', char_chord):
         monster_swords = []
         for monster in monsters:
@@ -72,6 +65,11 @@ class PgGroup(pygame.sprite.Group):
             if isinstance(monster_weapon, Attack):
                 monster_swords.append(monster_weapon)
         return monster_swords
+
+    @staticmethod
+    def draw_monster_bars(monsters, screen):
+        for monster in monsters:
+            monster.draw_health_bar(screen)
 
     @staticmethod
     def draw(screen, background, rest_of_sprites):
@@ -107,7 +105,7 @@ class GameState:
         # Used to draw. We separate background so we can ensure it gets pictured before other things.
         self.all_but_background.add(self.monsters)
 
-        self.time_test = False
+        self.time_test = False # Changed things in while loop so need to recreate timetest.
         self.time_dict = {'drawmove': 0, 'abilitydraw': 0, 'eventloop': 0, 'attacks': 0, 'collisions': 0,
                           'move': 0, 'clear/recover': 0, 'drawbars': 0}
         self.loop_counter = 0
@@ -129,20 +127,17 @@ class GameState:
                         if self.character.level_up():
                             self.ability_manager.ability_points += 1
                     elif type(sprite) is Character:
-                        #self.print_credits()
                         exit()
 
     def main(self):
         elapsed_time = 0
         while True:
-            a = pygame.time.get_ticks()
             for event in pygame.event.get():
                 if event.type == QUIT:
                     if self.time_test:
                         for key, value in self.time_dict.items():
                             print(key, value/self.loop_counter)
                     pygame.quit()
-                    #self.print_credits()
                     exit()
                 if event.type == KEYUP:
                     Mover.handle_character_event(event, False)
@@ -177,60 +172,35 @@ class GameState:
                             self.ability_manager.ability_points -= 1
                             self.character.increment_maxes()
 
-            b = pygame.time.get_ticks() - a
             self.screen.fill((0, 0, 0))
 
             self.character.calc_velocity(elapsed_time)
 
-            PgGroup.update_attacks(self.all_but_background)
-
             monster_weapons = PgGroup.monster_attack(self.monster_group, self.character.rect.center)
             self.all_but_background.add(monster_weapons)
             self.all_sprites.add(monster_weapons)
-            c = pygame.time.get_ticks() - (b + a)
-            # Collisions, must be after attack so can check for collisions between sword/monser/player.
-            Collider.check_collision_group(self.all_but_background, self.screen)
-            d = pygame.time.get_ticks() - (c + b + a)
-            # Move and show everything.
+
             self.all_sprites.update(self.character.velocity, self.character.rect)
-            e = pygame.time.get_ticks() - (d + c + b + a)
+
+            # Collisions should be after update so can check for collisions between sword/monster/player.
+            Collider.check_collision_group(self.all_but_background, self.screen)
+
 
             PgGroup.draw(self.screen, self.background, self.all_but_background)
-            z = pygame.time.get_ticks() - (e + d+ c + b + a)
             self.clear_weapon() # Must be after draw. Keep at end of loop, since attack happens in event for loop.
             self.clear_dead()
 
             self.character.recover()
 
-            f = pygame.time.get_ticks() - (e + d + c + b + a + z)
-
             # Draw the HUD
             self.character.draw_bars(self.screen)
 
-            for monster in self.monsters:
-                monster.draw_health_bar(self.screen)
-            g = pygame.time.get_ticks() - (f + e + d + c + b + a + z)
-            self.ability_manager.draw(self.screen, self.character.ability_levels)
-            h = pygame.time.get_ticks() - (g + f + e + d + c + b + a + z)
+            PgGroup.draw_monster_bars(self.monsters, self.screen)
 
-            if self.time_test:
-                self.time_dict['eventloop'] += b
-                self.time_dict['attacks'] += c
-                self.time_dict['collisions'] += d
-                self.time_dict['move'] += e
-                self.time_dict['drawmove'] += z
-                self.time_dict['clear/recover'] += f
-                self.time_dict['drawbars'] += g
-                self.time_dict['abilitydraw'] += h
-                self.loop_counter += 1
+            self.ability_manager.draw(self.screen, self.character.ability_levels)
 
             pygame.display.update()
             elapsed_time = self.my_clock.tick(FRAME_RATE)
-
-    def print_credits(self):
-        print("Thanks to Ryan Ward for helping me learn object oriented programming with this project.")
-        print("Thanks to opengameart.org, most images used in this game were from there..")
-        print("The ToughenUp ability picture was found on google images, but it originated from *Fable: The Lost Chapters.*")
 
 if __name__ == '__main__':
     gamestate = GameState()

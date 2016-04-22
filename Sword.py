@@ -163,9 +163,6 @@ class Attack(Ability):
     def handle_collision(self, collided_sprite):
         pass
 
-    def weapon_update(self):
-        pass
-
     def is_dead(self):
         return self.dead
 
@@ -204,11 +201,12 @@ class Sweep(Attack):
         self.unit_vect = self.unit_vect.rotate(-20)
         self.angle += 20
 
-    def weapon_update(self):
-        self.rotated += 40 # Keep rotating until 360 has happened.
+    def update(self, character_velocity, char_rect):
+        rotate_speed = 40
+        self.rotated += rotate_speed # Keep rotating until 360 has happened.
 
-        self.angle -= 40 # Rotates picture
-        self.unit_vect = self.unit_vect.rotate(40) # Changes the unit vector.
+        self.angle -= rotate_speed # Rotates picture
+        self.unit_vect = self.unit_vect.rotate(rotate_speed) # Changes the unit vector.
 
         self.move_image(self.unit_vect, self.sprite_cord) # move_image inherited from Attack
         if self.rotated >= 360:
@@ -258,19 +256,18 @@ class Arrow(Attack):
         # Rotate sword to go in direction of click. Minus 90 because sword originally points upwards.
         self.image = pygame.transform.rotate(self.image, self.angle)
 
-    def weapon_update(self):
-        ''' Move projectile forward. '''
-        self.rect = self.rect.move(self.x_move_ratio, self.y_move_ratio)
 
     def update(self, character_velocity, char_rect):
         '''
-        :action: Move projectile with character, so its path is normal.
+        :action: Move projectile with character, so its path is normal. Then, move it forward so it travels.
         '''
         self.rect.move_ip(character_velocity[0], character_velocity[1])
+        self.rect = self.rect.move(self.x_move_ratio, self.y_move_ratio)
+
 
     def handle_collision(self, collided_sprites):
         for sprite in collided_sprites:
-            if self.from_player != sprite.from_player:
+            if not isinstance(sprite, Arrow) and self.from_player != sprite.from_player:
                 self.dead = True
                 break
 
@@ -375,7 +372,7 @@ class FireStorm(Ability):
     info_color = MAGIC_INFO_COLOR
 
     def __init__(self, player_to_click, sprite_cord, from_player, ability_level):
-        pygame.sprite.Sprite.__init__(self)
+        Ability.__init__(self)
 
         width = 120
         height = 120
@@ -403,12 +400,6 @@ class FireStorm(Ability):
 
         self.current_time = pygame.time.get_ticks()
 
-    def weapon_update(self):
-        self.lifetime -= (pygame.time.get_ticks() - self.current_time)
-        self.current_time = pygame.time.get_ticks()
-        if self.lifetime < 0:
-            self.dead = True
-
     def handle_collision(self, collided_sprite):
         pass
 
@@ -417,6 +408,10 @@ class FireStorm(Ability):
         :action: Move fire with character, so its path is normal.
         '''
         self.rect.move_ip(character_velocity[0], character_velocity[1])
+        self.lifetime -= (pygame.time.get_ticks() - self.current_time)
+        self.current_time = pygame.time.get_ticks()
+        if self.lifetime < 0:
+            self.dead = True
 
     def is_dead(self):
         return self.dead
