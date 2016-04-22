@@ -152,9 +152,6 @@ class AbilityManager:
     def change_hotkey(self, index):
         self.ability_hotkeys[self.ability_to_change] = self.ability_list[index]
 
-    def set_menu_up(self, setting: bool):
-        self.menu_up = setting
-
     def _draw_hotkey_details(self, screen, ability_levels):
         for i in range(4): # Draw ability details. Hotkey at top left, "Level x" at bottom mid.
             try:

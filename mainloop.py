@@ -154,9 +154,9 @@ class GameState:
                         if test_index[0]:
                             self.ability_manager.change_hotkey(test_index[2])
                     if self.ability_manager.ability_image_clicked(event.pos):
-                        self.ability_manager.set_menu_up(True) if not self.ability_manager.menu_up else self.ability_manager.set_menu_up(False)
+                        self.ability_manager.menu_up = not self.ability_manager.menu_up
                     else:
-                        self.ability_manager.set_menu_up(False)
+                        self.ability_manager.menu_up = False
                         weapon = self.character.attack(event.pos, self.ability_manager.ability)
                         if weapon != None:
                             self.all_but_background.add(weapon) # For collisions
