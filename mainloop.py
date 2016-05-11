@@ -1,5 +1,4 @@
-LEFT = 1
-RIGHT = 3
+
 
 import pygame
 from pygame.locals import *
@@ -15,7 +14,6 @@ from Monster import ChampionMeleeMonster
 from Monster import RangeMonster
 from HUD import AbilityManager
 from Sword import Attack
-from Sword import FireStorm
 from Sword import FRAME_RATE
 
 '''
@@ -34,9 +32,7 @@ Some things to take a next step:
     - Ability to hold left click on monster to attack.
     - Equipment
         - Handling inventory
-            - Sort of Skyrim Style
-                - Menu on right side of screen above experirence bar, 3 tabs (main hand, armor, offhand)
-                - Items will be represented as text, can have picture show up when scrolling over.
+            - Reuse ability manager to hold equipment.
     - Bug Fixes
         - Monsters should always be above the FireStorm is not centering on click..
         - FireStorm is not centering on click.
@@ -52,6 +48,8 @@ Some things to take a next step:
 '''
 
 # Used for determining if MOUSEBUTTONDOWN was a left or right click.
+LEFT = 1
+RIGHT = 3
 
 class PgGroup(pygame.sprite.Group):
     def __init__(self, *args):
@@ -152,7 +150,7 @@ class GameState:
                     if self.ability_manager.menu_up:
                         test_index = self.ability_manager.menu_ability_clicked(event.pos)
                         if test_index[0]:
-                            self.ability_manager.change_hotkey(test_index[2])
+                            self.ability_manager.change_hotkey(test_index[1])
                     if self.ability_manager.ability_image_clicked(event.pos):
                         self.ability_manager.menu_up = not self.ability_manager.menu_up
                     else:

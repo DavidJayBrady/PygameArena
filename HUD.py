@@ -94,7 +94,9 @@ class AbilityManager:
                              S.Lightning, S.FireStorm, S.ToughenUp, None, None, None, None, None]
 
         # Controls what spell goes on which hotkey, and the image that shows up. These are defaults.
-        self.ability_hotkeys = {0: S.Attack, 1: S.Sweep, 2: S.Arrow, 3: S.SplitShot}
+        self.ability_hotkeys = {0: S.Attack, 1: S.Sweep, 2: S.Arrow, 3: S.SplitShot, 4: S.Attack, 5: S.Sweep,
+                                6: S.Arrow, 7: S.SplitShot, 8: S.Lightning, 9: S.FireStorm, 10: S.ToughenUp,
+                                11: None, 12: None, 13: None, 14: None, 15: None}
 
         # Default starting ability.
         self.ability = S.Attack
@@ -106,7 +108,7 @@ class AbilityManager:
         self.ability_menu_background_rect = (30, 360, 350, 300)
 
         self.menu_up = False
-        self.ability_to_change = None
+        self.index_clicked = None
 
 
         # Make numbers for ability hotkeys.
@@ -119,13 +121,22 @@ class AbilityManager:
             for j in range(4):
                 self.menu_rects[j + (i*4)] = Rect([40 + (j*90), 550 - (i*90), 80, 80])
 
+
+        self.all_rects = {x: Rect(40+(x*90), 650, 80, 80) for x in range(4)}
+        for i in range(3):
+            for j in range(4):
+                self.all_rects[4 + j + (i*4)] = Rect([40 + (j*90), 550 - (i*90), 80, 80])
+
+
     def draw(self, screen, ability_levels):
+
+        self._paint_ability_info(screen, self.ability_rect_list, ability_levels, True)
+
         if self.menu_up:
-            self._highlight_scrolled_over_ability(screen, self.menu_rects, ability_levels, False)
+            #self._paint_ability_info(screen, self.menu_rects, ability_levels, False)
             self._draw_abilities(screen, self.ability_menu_background_image,
                                  self.ability_menu_background_rect, self.ability_list, self.menu_rects)
 
-        self._highlight_scrolled_over_ability(screen, self.ability_rect_list, ability_levels, True)
 
         if self.ability_points > 0:
             extra_text = ' ability point to spend' if self.ability_points == 1 else ' ability points to spend'
@@ -137,20 +148,24 @@ class AbilityManager:
 
         self._draw_hotkey_details(screen, ability_levels)
 
+
     def ability_image_clicked(self, click_pos: tuple):
-        for index, ability_square in enumerate(self.ability_rect_list):
-            if ability_square.collidepoint(click_pos):
-                self.ability_to_change = index
+        for index in range(4):
+            if self.all_rects[index].collidepoint(click_pos):
+                self.index_clicked = index
                 return (True, self.ability_hotkeys[index])
 
-    def menu_ability_clicked(self, click_pos: tuple):
-        for index in range(len(self.menu_rects)):
-            if self.menu_rects[index].collidepoint(click_pos):
-                return (True, self.ability_list[index], index)
-        return (False,) # Keep it a tuple, so it is supscriptable just like when it returns True.
 
-    def change_hotkey(self, index):
-        self.ability_hotkeys[self.ability_to_change] = self.ability_list[index]
+    def menu_ability_clicked(self, click_pos: tuple):
+        for index in range(4, len(self.all_rects)):
+            if self.all_rects[index].collidepoint(click_pos):
+                return (True, self.ability_hotkeys[index])
+        return (False,)
+
+
+    def change_hotkey(self, weapon):
+        self.ability_hotkeys[self.index_clicked] = weapon
+
 
     def _draw_hotkey_details(self, screen, ability_levels):
         for i in range(4): # Draw ability details. Hotkey at top left, "Level x" at bottom mid.
@@ -162,19 +177,21 @@ class AbilityManager:
             except KeyError:
                 pass # So we can have abilities be empty.
 
-    def _highlight_scrolled_over_ability(self, screen, rect_container, ability_levels, from_hotkeys: bool):
-        # Highlight scrolled over picture in menu.
-        for i in range(len(rect_container)):
-            if rect_container[i].collidepoint(pygame.mouse.get_pos()):
 
-                self._draw_ability_details(screen, i, ability_levels, from_hotkeys) # True if from hotkey, False if from menu.
-                pygame.draw.rect(screen, (0, 200, 200), rect_container[i])
+    def _paint_ability_info(self, screen, rect_container, ability_levels, from_hotkeys: bool):
+        # Highlight scrolled over picture in menu and paint their details above.
+        iterate_part = 4 if not self.menu_up else len(self.all_rects)
+        for index in range(iterate_part):
+            if self.all_rects[index].collidepoint(pygame.mouse.get_pos()):
+                self._draw_ability_details(screen, index, ability_levels, from_hotkeys)
+                pygame.draw.rect(screen, (0, 200, 200), self.all_rects[index])
 
     def _draw_abilities(self, screen, image, image_rect, abilities, rect_container):
         screen.blit(image, image_rect)
         for i in range(len(rect_container)):
             self._square_image_blit(screen, abilities[i], (0, 100, 200) if not
                                    abilities[i] == self.ability else (100, 200, 200), rect_container[i])
+
 
     def _square_image_blit(self, screen, weapon: 'weapon class', color: tuple, ability_rect):
         pygame.draw.rect(screen, color, ability_rect, 1)
@@ -184,10 +201,11 @@ class AbilityManager:
     def _draw_ability_details(self, screen, index, ability_levels, from_hotkey):
         position = Rect(30, 540, 300, 50) if not self.menu_up else Rect(30, 260, 300, 50)
 
-        if not from_hotkey:
-            highlighted_ability = self.ability_list[index]
-        else:
+        if from_hotkey:
             highlighted_ability = self.ability_hotkeys[index]
+
+        else:
+            highlighted_ability = self.ability_list[index]
 
         try:
             ability_statistics = highlighted_ability.gather_statistics(
@@ -196,8 +214,5 @@ class AbilityManager:
             screen.blit(self.ability_background_image, position)
             for text, position in ability_statistics.items():
                 screen.blit(text, position)
-
-
-
         except (KeyError, AttributeError):
             pass

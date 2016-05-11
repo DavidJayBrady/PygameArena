@@ -152,7 +152,8 @@ class Attack(Ability):
         :param sprite_cord: Coordinates of sprite that made the attack. (Player or monster)
         :action: Move the sprite_cord in the direction of the unit_vect.
         '''
-        vector = list(map(lambda x: 80 * x, unit_vect))
+        weapon_range = 100
+        vector = list(map(lambda x: weapon_range * x, unit_vect))
         self.image.set_colorkey((0, 0, 0))
 
         # Get rect of image, move image to center of character, then start it right in front of player.
