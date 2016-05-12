@@ -151,7 +151,7 @@ class GameState:
                         test_index = self.ability_manager.menu_ability_clicked(event.pos)
                         if test_index[0]:
                             self.ability_manager.change_hotkey(test_index[1])
-                    if self.ability_manager.ability_image_clicked(event.pos):
+                    if self.ability_manager.active_image_clicked(event.pos):
                         self.ability_manager.menu_up = not self.ability_manager.menu_up
                     else:
                         self.ability_manager.menu_up = False
@@ -160,15 +160,14 @@ class GameState:
                             self.all_but_background.add(weapon) # For collisions
                             self.all_sprites.add(weapon) # For movement
                 elif event.type == MOUSEBUTTONDOWN and event.button == RIGHT:
-                    test_index = self.ability_manager.ability_image_clicked(event.pos)
+                    test_index = self.ability_manager.active_image_clicked(event.pos)
                     if self.ability_manager.menu_up:
                         test_index2 = self.ability_manager.menu_ability_clicked(event.pos)
                         test_index = test_index2 if test_index2[0] else test_index
-                    if test_index is not None:
-                        if test_index[0] and self.ability_manager.ability_points > 0:
-                            self.character.ability_levels[test_index[1]] += 1
-                            self.ability_manager.ability_points -= 1
-                            self.character.increment_maxes()
+                    if test_index is not None and test_index[0] and self.ability_manager.ability_points > 0:
+                        self.character.ability_levels[test_index[1]] += 1
+                        self.ability_manager.ability_points -= 1
+                        self.character.increment_maxes()
 
             self.screen.fill((0, 0, 0))
 
@@ -178,10 +177,11 @@ class GameState:
             self.all_but_background.add(monster_weapons)
             self.all_sprites.add(monster_weapons)
 
+            Collider.check_collision_group(self.all_but_background, self.screen)
+
             self.all_sprites.update(self.character.velocity, self.character.rect)
 
             # Collisions should be after update so can check for collisions between sword/monster/player.
-            Collider.check_collision_group(self.all_but_background, self.screen)
 
 
             PgGroup.draw(self.screen, self.background, self.all_but_background)

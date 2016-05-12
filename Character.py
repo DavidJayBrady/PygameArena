@@ -59,7 +59,7 @@ class Character(Mover):
 
         health_bar_offset = [-570, -320]
         energy_bar_offset = [-570, -280]
-        experience_bar_offset = [-200, 330]
+        experience_bar_offset = [-200, 340]
 
         self.healthbar = Bar(health_bar_offset, self.uses_caps, True, 'health')
         self.energybar = Bar(energy_bar_offset, self.uses_caps, True, 'energy')
