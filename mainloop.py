@@ -13,6 +13,7 @@ from Monster import Monster
 from Monster import ChampionMeleeMonster
 from Monster import RangeMonster
 from HUD import AbilityManager
+from HUD import Inventory
 from Sword import Attack
 from Sword import FRAME_RATE
 
@@ -91,6 +92,7 @@ class GameState:
                                                                             (RangeMonster, 25)))
 
         self.ability_manager = AbilityManager()
+        self.inventory = Inventory()
 
         # So we can call each monster's attack method.
         self.monster_group = PgGroup(self.monsters)
@@ -140,8 +142,8 @@ class GameState:
                 elif event.type == KEYDOWN:
                     if event.key == K_1 or event.key == K_2 or event.key == K_3 or event.key == K_4:
                         hotkey = event.key - 49 # printing out event.key gives 49, 50, 51, 52; for K_1, K_2...
-                        if self.ability_manager.abilities[hotkey] is not None:
-                            self.ability_manager.ability = self.ability_manager.abilities[hotkey]
+                        if self.ability_manager.attributes[hotkey] is not None:
+                            self.ability_manager.ability = self.ability_manager.attributes[hotkey]
                     else:
                         Mover.handle_character_event(event, True)
                 elif event.type == MOUSEBUTTONDOWN:
@@ -185,6 +187,7 @@ class GameState:
             PgGroup.draw_monster_bars(self.monsters, self.screen)
 
             self.ability_manager.draw(self.screen, self.character.ability_levels)
+            self.inventory.draw(self.screen, self.character.ability_levels)
 
             pygame.display.update()
             elapsed_time = self.my_clock.tick(FRAME_RATE)
