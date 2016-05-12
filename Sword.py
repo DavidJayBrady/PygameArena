@@ -169,7 +169,7 @@ class Attack(Ability):
 
     @staticmethod
     def calc_damage(ability_level, from_player):
-        return 15 + (ability_level * 5) if from_player else 10 + (ability_level * 5)
+        return 30 + (ability_level * 5) if from_player else 10 + (ability_level * 5)
 
     @staticmethod
     def calc_cooldown(ability_level, from_player):
@@ -194,7 +194,7 @@ class Sweep(Attack):
         self.rotated = 0
         self.dead = False
 
-        self.damage = 10 + (ability_level * 5)
+        self.damage = Sweep.calc_damage(ability_level, True)
         self.energy_consume = Sweep.calc_energy_consume(ability_level, True)
         self.cooldown = 800
 
@@ -215,7 +215,7 @@ class Sweep(Attack):
 
     @staticmethod
     def calc_damage(ability_level, from_player):
-        return 10 + (ability_level * 5)
+        return 15 + (ability_level * 5)
 
     @staticmethod
     def calc_cooldown(ability_level, from_player):
@@ -224,7 +224,6 @@ class Sweep(Attack):
     @staticmethod
     def calc_energy_consume(ability_level, from_player):
         return 30
-
 
 class Arrow(Attack):
 

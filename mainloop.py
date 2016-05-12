@@ -140,8 +140,8 @@ class GameState:
                 elif event.type == KEYDOWN:
                     if event.key == K_1 or event.key == K_2 or event.key == K_3 or event.key == K_4:
                         hotkey = event.key - 49 # printing out event.key gives 49, 50, 51, 52; for K_1, K_2...
-                        if self.ability_manager.ability_hotkeys[hotkey] is not None:
-                            self.ability_manager.ability = self.ability_manager.ability_hotkeys[hotkey]
+                        if self.ability_manager.abilities[hotkey] is not None:
+                            self.ability_manager.ability = self.ability_manager.abilities[hotkey]
                     else:
                         Mover.handle_character_event(event, True)
                 elif event.type == MOUSEBUTTONDOWN:
