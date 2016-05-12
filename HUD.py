@@ -3,6 +3,10 @@ from pygame.locals import *
 
 import Sword as S
 
+# Used for determining if MOUSEBUTTONDOWN was a left or right click.
+LEFT = 1
+RIGHT = 3
+
 class Bar:
     def __init__(self, offset, uses_caps: bool, from_player: bool, type: str):
         self.offset = offset
@@ -122,7 +126,7 @@ class Menu:
 
         try:
             ability_statistics = highlighted_ability.gather_statistics(
-                highlighted_ability,ability_levels[highlighted_ability], list(position)[:2])
+                highlighted_ability, ability_levels[highlighted_ability], list(position)[:2])
 
             screen.blit(self.ability_background_image, position)
             for text, position in ability_statistics.items():
@@ -174,13 +178,8 @@ class AbilityManager(Menu):
         self.all_rects = {x: Rect(40+(x*90), 650, 80, 80) for x in range(4)}
         for i in range(3):
             for j in range(4):
-                self.all_rects[4 + j + (i*4)] = Rect([40 + (j*90), 550 - (i*90), 80, 80])
-
-        self.all_rects = {x: Rect(40+(x*90), 650, 80, 80) for x in range(4)}
-        for i in range(3):
-            for j in range(4):
-                self.all_rects[4 + j + (i*4)] = Rect([40 + (j*90), 550 - (i*90), 80, 80])
-
+                self.all_rects[4 + j + (i*4)] = Rect([40 + (j*90), 560 - (i*90), 80, 80])
+        print(self.all_rects)
 
     def draw(self, screen, ability_levels):
         Menu.draw(self, screen, ability_levels)
@@ -205,4 +204,20 @@ class AbilityManager(Menu):
                 pass # So we can have abilities be empty.
 
     def handle_click(self, event):
-        pass
+        if event.button == LEFT:
+            if self.menu_up:
+                test_index = self.menu_ability_clicked(event.pos)
+                if test_index[0]:
+                    self.change_hotkey(test_index[1])
+            if self.active_image_clicked(event.pos):
+                self.menu_up = not self.menu_up
+            else:
+                self.menu_up = not self.menu_up
+        elif event.button == RIGHT:
+            test_index = self.active_image_clicked(event.pos)
+            if self.menu_up:
+                test_index2 = self.menu_ability_clicked(event.pos)
+                test_index = test_index2 if test_index2[0] else test_index
+            if test_index is not None and test_index[0] and self.ability_points > 0:
+                self.ability_points -= 1
+                return test_index[1]

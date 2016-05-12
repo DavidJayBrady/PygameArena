@@ -47,9 +47,7 @@ Some things to take a next step:
     - Make this games positions not hardcoded. Only set for 1280 by 800 pixels right now.
 '''
 
-# Used for determining if MOUSEBUTTONDOWN was a left or right click.
-LEFT = 1
-RIGHT = 3
+
 
 class PgGroup(pygame.sprite.Group):
     def __init__(self, *args):
@@ -146,28 +144,19 @@ class GameState:
                             self.ability_manager.ability = self.ability_manager.ability_hotkeys[hotkey]
                     else:
                         Mover.handle_character_event(event, True)
-                elif event.type == MOUSEBUTTONDOWN and event.button == LEFT:
-                    if self.ability_manager.menu_up:
-                        test_index = self.ability_manager.menu_ability_clicked(event.pos)
-                        if test_index[0]:
-                            self.ability_manager.change_hotkey(test_index[1])
-                    if self.ability_manager.active_image_clicked(event.pos):
-                        self.ability_manager.menu_up = not self.ability_manager.menu_up
+                elif event.type == MOUSEBUTTONDOWN:
+                    if Rect(30, 640, 370, 100).collidepoint(event.pos) or (self.ability_manager.menu_up and Rect(30, 360, 370, 300).collidepoint(event.pos)):
+                         ability_leveled =  self.ability_manager.handle_click(event)
+                         if ability_leveled:
+                             self.character.ability_levels[ability_leveled] += 1
+                             self.character.increment_maxes()
                     else:
                         self.ability_manager.menu_up = False
                         weapon = self.character.attack(event.pos, self.ability_manager.ability)
                         if weapon != None:
                             self.all_but_background.add(weapon) # For collisions
                             self.all_sprites.add(weapon) # For movement
-                elif event.type == MOUSEBUTTONDOWN and event.button == RIGHT:
-                    test_index = self.ability_manager.active_image_clicked(event.pos)
-                    if self.ability_manager.menu_up:
-                        test_index2 = self.ability_manager.menu_ability_clicked(event.pos)
-                        test_index = test_index2 if test_index2[0] else test_index
-                    if test_index is not None and test_index[0] and self.ability_manager.ability_points > 0:
-                        self.character.ability_levels[test_index[1]] += 1
-                        self.ability_manager.ability_points -= 1
-                        self.character.increment_maxes()
+
 
             self.screen.fill((0, 0, 0))
 
