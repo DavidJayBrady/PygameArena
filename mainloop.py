@@ -142,8 +142,10 @@ class GameState:
                 elif event.type == KEYDOWN:
                     if event.key == K_1 or event.key == K_2 or event.key == K_3 or event.key == K_4:
                         hotkey = event.key - 49 # printing out event.key gives 49, 50, 51, 52; for K_1, K_2...
-                        if self.ability_manager.attributes[hotkey] is not None:
-                            self.ability_manager.ability = self.ability_manager.attributes[hotkey]
+                        if self.ability_manager.elements[hotkey] is not None:
+                            self.ability_manager.ability = self.ability_manager.elements[hotkey]
+                    elif event.key == K_i:
+                        self.inventory.menu_up = not self.inventory.menu_up
                     else:
                         Mover.handle_character_event(event, True)
                 elif event.type == MOUSEBUTTONDOWN:
@@ -152,8 +154,11 @@ class GameState:
                          if ability_leveled:
                              self.character.ability_levels[ability_leveled] += 1
                              self.character.increment_maxes()
+                    elif Rect(880, 640, 370, 115).collidepoint(event.pos) or (self.inventory.menu_up and Rect(880, 280, 370, 360).collidepoint(event.pos)):
+                         self.inventory.handle_click(event)
                     else:
                         self.ability_manager.menu_up = False
+                        self.inventory.menu_up = False
                         weapon = self.character.attack(event.pos, self.ability_manager.ability)
                         if weapon != None:
                             self.all_but_background.add(weapon) # For collisions

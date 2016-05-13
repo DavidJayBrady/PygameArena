@@ -76,32 +76,30 @@ class Menu:
         self.hotkey_texts = [self.font.render(str(i), True, (100, 200, 200)) for i in range(1, 5)]
 
 
-    def draw(self, screen, ability_levels):
-
-        self._paint_ability_info(screen, ability_levels)
-
-        self._draw_abilities(screen)
 
 
     def active_image_clicked(self, click_pos: tuple):
         for index in range(4):
             if self.positions[index].collidepoint(click_pos):
                 self.index_clicked = index
-                return (True, self.attributes[index])
+                return (True, self.elements[index])
 
     def menu_ability_clicked(self, click_pos: tuple):
         for index in range(4, len(self.positions)):
             if self.positions[index].collidepoint(click_pos):
-                return (True, self.attributes[index])
+                return (True, self.elements[index], index)
         return (False,)
 
+    def _change_element(self, weapon):
+        self.elements[self.index_clicked] = weapon
 
-    def _paint_ability_info(self, screen, ability_levels):
+
+    def _paint_ability_info(self, screen, ability_levels, detail_position):
         # Highlight scrolled over picture in menu and paint their details above.
         iterate_part = 4 if not self.menu_up else len(self.positions)
         for index in range(iterate_part):
             if self.positions[index].collidepoint(pygame.mouse.get_pos()):
-                self._draw_ability_details(screen, index, ability_levels)
+                self._draw_ability_details(screen, index, ability_levels, detail_position)
                 pygame.draw.rect(screen, (0, 200, 200), self.positions[index])
 
     def _draw_abilities(self, screen):
@@ -111,25 +109,29 @@ class Menu:
 
         iterate_part = 4 if not self.menu_up else len(self.positions)
         for index in range(iterate_part):
-            self._square_image_blit(screen, self.attributes[index], (0, 100, 200) if not
-                                   self.attributes[index] == self.ability else (100, 200, 200), self.positions[index])
+            self._square_image_blit(screen, self.elements[index], (0, 100, 200) if not
+                                   self.elements[index] == self.ability else (100, 200, 200), self.positions[index])
 
     def _square_image_blit(self, screen, weapon: 'weapon class', color: tuple, ability_rect):
         pygame.draw.rect(screen, color, ability_rect, 1)
         if weapon is not None:
-            screen.blit(self.attribute_images[weapon], ability_rect)
+            screen.blit(self.element_images[weapon], ability_rect)
 
-    def _draw_ability_details(self, screen, index, ability_levels):
-        position = Rect(30, 235 + ((self.rows - 1) * 100), 300, 50) if not self.menu_up else Rect(30, 245, 300, 50)
+    def _draw_ability_details(self, screen, index, ability_levels, area_from: str):
+        if area_from == "ability manager":
+            position = Rect(30, 235 + ((self.rows - 1) * 100), 300, 50) if not self.menu_up else Rect(30, 245, 300, 50)
+        elif area_from == "inventory":
+            position = Rect(880, 135 + ((self.rows - 1) * 100), 300, 50) if not self.menu_up else Rect(880, 165, 300, 50)
 
-        highlighted_attribute = self.attributes[index]
+
+        highlighted_element = self.elements[index]
 
         try:
-            attribute_statistics = highlighted_attribute.gather_statistics(
-                highlighted_attribute, ability_levels[highlighted_attribute], list(position)[:2])
+            element_statistics = highlighted_element.gather_statistics(
+                highlighted_element, ability_levels[highlighted_element], list(position)[:2])
 
             screen.blit(self.menu_background_image, position)
-            for text, position in attribute_statistics.items():
+            for text, position in element_statistics.items():
                 screen.blit(text, position)
         except (KeyError, AttributeError):
             pass
@@ -140,12 +142,14 @@ class Inventory(Menu):
 
         left_side_x = 880
 
+        self.element_to_move = None
+
         ability_background = pygame.image.load('Other Art/Ability_Background.png')
         self.menu_background_image = pygame.transform.smoothscale(ability_background, [370, 115])
         self.menu_background_rect = Rect(left_side_x, 640, 370, 115)
 
-        self.menu_up_background_image = pygame.transform.smoothscale(self.menu_background_image, [370, 300])
-        self.menu_up_background_rect = (left_side_x, 360, 370, 300)
+        self.menu_up_background_image = pygame.transform.smoothscale(ability_background, [370, 360])
+        self.menu_up_background_rect = (left_side_x, 280, 370, 360)
 
         # Generate a dictionary, keys 0-15, with each value being a Rect, or a location.
         # Shape is as follows.
@@ -165,10 +169,56 @@ class Inventory(Menu):
 
         self.ability = None # Remove this soon.
 
-        self.attributes = {0: None, 1: None, 2: None, 3: None, 4: None, 5: None,
+        self.elements = {0: S.Attack, 1: None, 2: None, 3: None, 4: None, 5: None,
                                 6: None, 7: None, 8: None, 9: None, 10: None,
                                 11: None, 12: None, 13: None, 14: None, 15: None,
-                                16: None, 17: None, 18: None, 19: None}
+                                16: None, 17: None, 18: None, 19: S.Lightning}
+
+        ### The following images are here for testing inventory behavior. ###
+        load_and_scale = lambda x: pygame.transform.smoothscale(pygame.image.load(x), [80, 80])
+
+        toughen_image = load_and_scale('Other Art/ToughenUp.png')
+        attack_image = load_and_scale('Other Art/Sword_Ability.png')
+        sweep_image = load_and_scale('Other Art/Sweep_Ability.png')
+        arrow_image = load_and_scale('Other Art/BowArrow.png')
+        splitshot_image = load_and_scale('Other Art/Splitshot.png')
+        lightning_image = load_and_scale('Other Art/Lightning.jpg')
+        lightning_image.set_colorkey((0, 0 ,0))
+        firestorm_image = load_and_scale('Other Art/Fireball.png')
+        firestorm_image.set_colorkey((0, 0 , 0))
+
+        self.element_images = {S.ToughenUp: toughen_image, S.Attack: attack_image,
+                               S.Sweep: sweep_image, S.Arrow: arrow_image,
+                               S.SplitShot: splitshot_image, S.Lightning: lightning_image,
+                               S.FireStorm: firestorm_image}
+        ### End
+
+    def draw(self, screen, ability_levels):
+        self._paint_ability_info(screen, ability_levels, "inventory")
+
+        self._draw_abilities(screen)
+
+
+    def handle_click(self, event):
+        if event.button == LEFT:
+            if self.menu_up:
+                test_index = self.menu_ability_clicked(event.pos)
+                if test_index[0]:
+                    self._change_element(test_index[1])
+            if self.active_image_clicked(event.pos):
+                self.menu_up = not self.menu_up
+            else:
+                self.menu_up = not self.menu_up
+
+        elif event.button == RIGHT:
+            test_index = self.active_image_clicked(event.pos)
+            if self.menu_up:
+                test_index2 = self.menu_ability_clicked(event.pos)
+                test_index = test_index2 if test_index2[0] else test_index
+            if test_index is not None and test_index[0] and test_index[1] and self.ability_points > 0:
+                self.ability_points -= 1
+                return test_index[1]
+
 
 class AbilityManager(Menu):
     def __init__(self):
@@ -193,12 +243,12 @@ class AbilityManager(Menu):
         firestorm_image = load_and_scale('Other Art/Fireball.png')
         firestorm_image.set_colorkey((0, 0 , 0))
 
-        self.attribute_images = {S.ToughenUp: toughen_image, S.Attack: attack_image,
+        self.element_images = {S.ToughenUp: toughen_image, S.Attack: attack_image,
                                S.Sweep: sweep_image, S.Arrow: arrow_image,
                                S.SplitShot: splitshot_image, S.Lightning: lightning_image,
                                S.FireStorm: firestorm_image}
 
-        self.attribute_names = {S.ToughenUp: "Toughen Up", S.Attack: "Strike", S.Sweep: "Sweep", S.Arrow: 'SingleShot',
+        self.element_names = {S.ToughenUp: "Toughen Up", S.Attack: "Strike", S.Sweep: "Sweep", S.Arrow: 'SingleShot',
                               S.SplitShot: "Splitshot", S.Lightning: "Lightning", S.FireStorm: "FireStorm"}
 
         # Belongs in character, but only single player game, so does not matter and is more convenient here.
@@ -206,7 +256,7 @@ class AbilityManager(Menu):
 
         self.ability = S.Attack
 
-        self.attributes = {0: S.Attack, 1: S.Sweep, 2: S.Arrow, 3: S.SplitShot, 4: S.Attack, 5: S.Sweep,
+        self.elements = {0: S.Attack, 1: S.Sweep, 2: S.Arrow, 3: S.SplitShot, 4: S.Attack, 5: S.Sweep,
                                 6: S.Arrow, 7: S.SplitShot, 8: S.Lightning, 9: S.FireStorm, 10: S.ToughenUp,
                                 11: None, 12: None, 13: None, 14: None, 15: None}
 
@@ -228,21 +278,22 @@ class AbilityManager(Menu):
 
 
     def draw(self, screen, ability_levels):
-        Menu.draw(self, screen, ability_levels)
+
+        self._paint_ability_info(screen, ability_levels, "ability manager")
+
+        self._draw_abilities(screen)
+
         self._draw_hotkey_details(screen, ability_levels)
 
         if self.ability_points > 0:
             extra_text = ' ability point to spend' if self.ability_points == 1 else ' ability points to spend'
             screen.blit(self.font.render(str(self.ability_points) + extra_text, True, (120, 200, 160)),[50, 140])
 
-    def change_hotkey(self, weapon):
-        self.attributes[self.index_clicked] = weapon
-
     def _draw_hotkey_details(self, screen, ability_levels):
 
         for i in range(4): # Draw ability details. Hotkey at top left, "Level x" at bottom mid.
             try:
-                text = self.font.render("Level " + str(ability_levels[self.attributes[i]]), True, (100, 200, 200))
+                text = self.font.render("Level " + str(ability_levels[self.elements[i]]), True, (100, 200, 200))
                 text_pos = list(map(lambda x, y: x - y, self.positions[i].bottomright, [70, 0]))
                 screen.blit(self.hotkey_texts[i], self.positions[i].topleft)
                 screen.blit(text, text_pos)
@@ -254,7 +305,7 @@ class AbilityManager(Menu):
             if self.menu_up:
                 test_index = self.menu_ability_clicked(event.pos)
                 if test_index[0]:
-                    self.change_hotkey(test_index[1])
+                    self._change_element(test_index[1])
             if self.active_image_clicked(event.pos):
                 self.menu_up = not self.menu_up
             else:
