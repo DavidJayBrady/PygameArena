@@ -82,16 +82,16 @@ class Menu:
         for index in range(4):
             if self.positions[index].collidepoint(click_pos):
                 self.index_clicked = index
-                return (True, self.elements[index])
+                return (True, index)
 
     def menu_ability_clicked(self, click_pos: tuple):
         for index in range(4, len(self.positions)):
             if self.positions[index].collidepoint(click_pos):
-                return (True, self.elements[index], index)
+                return (True,  index)
         return (False,)
 
-    def _change_element(self, weapon):
-        self.elements[self.index_clicked] = weapon
+    def _change_element(self, index):
+        self.elements[self.index_clicked] = self.elements[index]
 
 
     def _paint_ability_info(self, screen, ability_levels, detail_position):
@@ -143,6 +143,7 @@ class Inventory(Menu):
         left_side_x = 880
 
         self.element_to_move = None
+        self.ready_to_swap = False
 
         ability_background = pygame.image.load('Other Art/Ability_Background.png')
         self.menu_background_image = pygame.transform.smoothscale(ability_background, [370, 115])
@@ -170,7 +171,7 @@ class Inventory(Menu):
         self.ability = None # Remove this soon.
 
         self.elements = {0: S.Attack, 1: None, 2: None, 3: None, 4: None, 5: None,
-                                6: None, 7: None, 8: None, 9: None, 10: None,
+                                6: None, 7: None, 8: S.ToughenUp, 9: None, 10: None,
                                 11: None, 12: None, 13: None, 14: None, 15: None,
                                 16: None, 17: None, 18: None, 19: S.Lightning}
 
@@ -194,30 +195,32 @@ class Inventory(Menu):
         ### End
 
     def draw(self, screen, ability_levels):
+        self._highlight_element_to_move(screen)
+
         self._paint_ability_info(screen, ability_levels, "inventory")
 
         self._draw_abilities(screen)
 
+    def _highlight_element_to_move(self, screen):
+        if self.element_to_move is not None:
+            pygame.draw.rect(screen, (100, 200, 100), self.positions[self.element_to_move], 0)
 
     def handle_click(self, event):
         if event.button == LEFT:
             if self.menu_up:
                 test_index = self.menu_ability_clicked(event.pos)
-                if test_index[0]:
-                    self._change_element(test_index[1])
-            if self.active_image_clicked(event.pos):
-                self.menu_up = not self.menu_up
-            else:
-                self.menu_up = not self.menu_up
+                if not test_index[0]:
+                    test_index = self.active_image_clicked(event.pos)
+                if test_index is not None and test_index[0]:
+                    if not self.ready_to_swap:
+                        self.ready_to_swap = True
+                        self.element_to_move = test_index[1]
+                    else:
+                        self.elements[self.element_to_move], self.elements[test_index[1]]\
+                            = self.elements[test_index[1]], self.elements[self.element_to_move]
+                        self.ready_to_swap = False
+                        self.element_to_move = None
 
-        elif event.button == RIGHT:
-            test_index = self.active_image_clicked(event.pos)
-            if self.menu_up:
-                test_index2 = self.menu_ability_clicked(event.pos)
-                test_index = test_index2 if test_index2[0] else test_index
-            if test_index is not None and test_index[0] and test_index[1] and self.ability_points > 0:
-                self.ability_points -= 1
-                return test_index[1]
 
 
 class AbilityManager(Menu):
@@ -317,4 +320,4 @@ class AbilityManager(Menu):
                 test_index = test_index2 if test_index2[0] else test_index
             if test_index is not None and test_index[0] and test_index[1] and self.ability_points > 0:
                 self.ability_points -= 1
-                return test_index[1]
+                return self.elements[test_index[1]]
