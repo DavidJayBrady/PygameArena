@@ -3,6 +3,7 @@ from SpriteSheet import SpriteSheet
 from HUD import Bar
 from Mover import Mover
 import Sword as S
+import Items
 
 class Character(Mover):
     def __init__(self, gamestate_area):
@@ -13,7 +14,7 @@ class Character(Mover):
         self.level_experience = 1000
 
         self.ability_levels = {S.Attack: 1, S.Sweep: 1, S.Arrow: 1, S.SplitShot: 1, S.Lightning: 1,
-                               S.FireStorm: 1, S.ToughenUp: 1}
+                               S.FireStorm: 1, S.ToughenUp: 1, Items.Armor: None}
 
         self.from_player = True
 

@@ -122,7 +122,6 @@ class Menu:
         elif area_from == "inventory":
             position = Rect(880, 135 + ((self.rows - 1) * 100), 300, 50) if not self.menu_up else Rect(880, 165, 300, 50)
 
-
         highlighted_element = self.elements[index]
 
         try:
@@ -215,15 +214,20 @@ class Inventory(Menu):
                         self.ready_to_swap = True
                         self.element_to_move = test_index[1]
                     else:
-                        # if self.element is 0-3, call enter on self.elements[test_index[1]]
-                        # and call leave on self.elements[self.element_to_move]
-
+                        if self.element_to_move in (0, 1, 2, 3):
+                            try:
+                                self.elements[test_index[1]].on_active_enter(ability_levels)
+                            except AttributeError:
+                                pass
+                            try:
+                                self.elements[self.element_to_move].on_active_leave(ability_levels)
+                            except AttributeError:
+                                pass
 
                         self.elements[self.element_to_move], self.elements[test_index[1]]\
                             = self.elements[test_index[1]], self.elements[self.element_to_move]
                         self.ready_to_swap = False
                         self.element_to_move = None
-
 
 
 class AbilityManager(Menu):
