@@ -28,7 +28,7 @@ class Mover(pygame.sprite.Sprite):
         if event.key == K_d:
             Mover.set_right = setting
 
-    def update(self, character_velocity, char_rect):
+    def update(self, character_velocity, char_rect, elapsed_time):
         '''
         :param items: List of rectangles, representing locations
         :param sprite_list: All of the sprites we need to move

@@ -86,7 +86,7 @@ class Character(Mover):
         except AttributeError:
             return None
 
-    def update(self, character_speed, char_rect):
+    def update(self, character_speed, char_rect, elapsed_time):
         '''
         :param character_speed: Not used, have to pass here to pass to monster. Char cord not used either.
         :action: Change image of character to moving direction.
@@ -131,11 +131,11 @@ class Character(Mover):
         self.energybar.draw_health_bar(screen, self.rect, self.energy, self.max_energy)
         self.experiencebar.draw_health_bar(screen, self.rect, self.experience, self.level_experience)
 
-    def recover(self):
+    def recover(self, elapsed_time):
         if self.health < self.max_health:
-            self.health += .1 + (.05 * self.ability_levels[S.ToughenUp])
+            self.health += (.01 + (.004 * self.ability_levels[S.ToughenUp])) * elapsed_time
         if self.energy < self.max_energy:
-            self.energy += 1
+            self.energy += .01 * elapsed_time
 
     def level_up(self):
         if self.experience > self.level_experience:

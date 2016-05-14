@@ -93,8 +93,8 @@ class Monster(Mover):
         self.velocity = find_speed[self.direction]
         self.walk_counter += 1
 
-    def update(self, char_velocity, char_rect):
-        Mover.update(self, char_velocity, char_rect)
+    def update(self, char_velocity, char_rect, elapsed_time):
+        Mover.update(self, char_velocity, char_rect, elapsed_time)
         if not self.player_around(char_rect, 700, '<'):
             self.walk_random()
         else:
@@ -235,9 +235,9 @@ class RangeMonster(Monster):
         self.health = 80 + (10 * self.level)
         self.max_health = self.health
 
-    def update(self, char_speed, char_rect):
+    def update(self, char_speed, char_rect, elapsed_time):
         ''' Overriding for range monster to maintain a distance from the player. '''
-        Mover.update(self, char_speed, char_rect)
+        Mover.update(self, char_speed, char_rect, elapsed_time)
 
         # Walk to player if more than 800 pixels away.
         if self.player_around(char_rect, RangeMonster.detect_range, '>') and self.player_around(char_rect, 900, '<'):

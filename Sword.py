@@ -4,7 +4,7 @@ Ability Ideas:
     - Lightning Throns: Orbit lightning balls around player, consume energy, do damage to surrounding enemies.
     - Powershot: Stand still, charge up arrow, and fire. Big damage, pierce.
 '''
-FRAME_RATE = 15
+FRAME_RATE = 20
 
 import pygame
 from pygame.locals import *
@@ -202,8 +202,8 @@ class Sweep(Attack):
         self.unit_vect = self.unit_vect.rotate(-20)
         self.angle += 20
 
-    def update(self, character_velocity, char_rect):
-        rotate_speed = 40
+    def update(self, character_velocity, char_rect, elapsed_time):
+        rotate_speed = .50 * elapsed_time
         self.rotated += rotate_speed # Keep rotating until 400 has happened.
 
         self.angle -= rotate_speed # Rotates picture
@@ -236,8 +236,8 @@ class Arrow(Attack):
     def __init__(self, player_to_click, sprite_cord, from_player, ability_level):
         Attack.__init__(self, player_to_click, sprite_cord, from_player, ability_level)
 
-        self.x_move_ratio = self.unit_vect[0] * 20
-        self.y_move_ratio = self.unit_vect[1] * 20
+        self.x_move_ratio = self.unit_vect[0] / 2.5
+        self.y_move_ratio = self.unit_vect[1] / 2.5
 
         self.move_image(self.unit_vect, sprite_cord)
 
@@ -257,12 +257,12 @@ class Arrow(Attack):
         self.image = pygame.transform.rotate(self.image, self.angle)
 
 
-    def update(self, character_velocity, char_rect):
+    def update(self, character_velocity, char_rect, elapsed_time):
         '''
         :action: Move projectile with character, so its path is normal. Then, move it forward so it travels.
         '''
         self.rect.move_ip(character_velocity[0], character_velocity[1])
-        self.rect = self.rect.move(self.x_move_ratio, self.y_move_ratio)
+        self.rect = self.rect.move(self.x_move_ratio * elapsed_time, self.y_move_ratio * elapsed_time)
 
 
     def handle_collision(self, collided_sprites):
@@ -338,8 +338,8 @@ class Lightning(Arrow):
         self.cooldown = self.calc_cooldown(ability_level, from_player)
         self.energy_consume = Lightning.calc_energy_consume(ability_level, from_player)
 
-        self.x_move_ratio = self.unit_vect[0] * 70
-        self.y_move_ratio = self.unit_vect[1] * 70
+        self.x_move_ratio = self.unit_vect[0] * 1.5
+        self.y_move_ratio = self.unit_vect[1] * 1.5
 
         self.energy_consume = Lightning.calc_energy_consume(ability_level, True)
 
@@ -371,6 +371,12 @@ class FireStorm(Ability):
     name_color = MAGIC_COLOR
     info_color = MAGIC_INFO_COLOR
 
+    delta_time = (1/FRAME_RATE) * 1000
+
+    initial_damage = .025
+    scale_damage = .008
+
+
     def __init__(self, player_to_click, sprite_cord, from_player, ability_level):
         Ability.__init__(self)
 
@@ -401,15 +407,17 @@ class FireStorm(Ability):
 
         self.current_time = pygame.time.get_ticks()
 
+
     def handle_collision(self, collided_sprite):
         pass
 
-    def update(self, character_velocity, char_rect):
-        '''
-        :action: Move fire with character, so its path is normal.
-        '''
+    def update(self, character_velocity, char_rect, elapsed_time):
         self.rect.move_ip(character_velocity[0], character_velocity[1])
-        self.lifetime -= (pygame.time.get_ticks() - self.current_time)
+
+        FireStorm.delta_time = pygame.time.get_ticks() - self.current_time
+
+        self.lifetime -= FireStorm.delta_time
+
         self.current_time = pygame.time.get_ticks()
         if self.lifetime < 0:
             self.dead = True
@@ -419,7 +427,11 @@ class FireStorm(Ability):
 
     @staticmethod
     def calc_damage(ability_level, from_player):
-        return 1 + (ability_level * .5)
+        return (FireStorm.initial_damage + (ability_level * FireStorm.scale_damage)) * FireStorm.delta_time
+
+    @staticmethod
+    def calc_dps(ability_level):
+        return (FireStorm.initial_damage + (ability_level * FireStorm.scale_damage)) * 1000
 
     @staticmethod
     def calc_cooldown(ability_level, from_player):
@@ -435,7 +447,7 @@ class FireStorm(Ability):
         stats[FONT.render(type.name, True, type.name_color)] = adjust(detail_box, (10, 10))
         stats[FONT.render("Level: "+str(ability_level), True, type.info_color)] = adjust(detail_box, (110, 10))
         stats[FONT.render("Type: " +str(type.ability_type), True, type.info_color)] = adjust(detail_box, (250, 50))
-        stats[FONT.render("Damage: "+str(type.calc_damage(ability_level, True)), True, type.info_color)] = adjust(detail_box, (225, 10))
+        stats[FONT.render("DPS: "+str(type.calc_dps(ability_level)), True, type.info_color)] = adjust(detail_box, (225, 10))
         stats[FONT.render("Energy: "+str(round(type.calc_energy_consume(ability_level, True))), True, type.info_color)] = adjust(detail_box, (10, 50))
         stats[FONT.render("Cooldown: "+str(type.calc_cooldown(ability_level, True)), True, type.info_color)] = adjust(detail_box, (110, 50))
         stats[FONT.render(type.description, True, type.info_color)] = adjust(detail_box, (10, 80))
@@ -446,3 +458,5 @@ class FireStorm(Ability):
 # Spells can cause + buffs on player.
 
 # Spell idea,  ice wall in front of player. Chill enemies near wall. Blocks attacks till it "dies".
+
+# Bow idea, slow motion arrows

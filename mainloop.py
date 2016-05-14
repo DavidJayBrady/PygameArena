@@ -173,7 +173,7 @@ class GameState:
 
             Collider.check_collision_group(self.all_but_background, self.screen)
 
-            self.all_sprites.update(self.character.velocity, self.character.rect)
+            self.all_sprites.update(self.character.velocity, self.character.rect, elapsed_time)
 
             # Collisions should be after update so can check for collisions between sword/monster/player.
 
@@ -182,7 +182,7 @@ class GameState:
             self.clear_weapon() # Must be after draw. Keep at end of loop, since attack happens in event for loop.
             self.clear_dead()
 
-            self.character.recover()
+            self.character.recover(elapsed_time)
 
             # Draw the HUD
             self.character.draw_bars(self.screen)
