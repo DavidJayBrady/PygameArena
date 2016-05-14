@@ -204,13 +204,13 @@ class Sweep(Attack):
 
     def update(self, character_velocity, char_rect):
         rotate_speed = 40
-        self.rotated += rotate_speed # Keep rotating until 360 has happened.
+        self.rotated += rotate_speed # Keep rotating until 400 has happened.
 
         self.angle -= rotate_speed # Rotates picture
-        self.unit_vect = self.unit_vect.rotate(rotate_speed) # Changes the unit vector.
+        self.unit_vect = self.unit_vect.rotate(rotate_speed)
 
-        self.move_image(self.unit_vect, self.sprite_cord) # move_image inherited from Attack
-        if self.rotated >= 360:
+        self.move_image(self.unit_vect, self.sprite_cord)
+        if self.rotated >= 400:
             self.dead = True
 
     @staticmethod
@@ -374,8 +374,8 @@ class FireStorm(Ability):
     def __init__(self, player_to_click, sprite_cord, from_player, ability_level):
         Ability.__init__(self)
 
-        width = 120
-        height = 120
+        width = 200
+        height = 200
 
         self.image = pygame.transform.smoothscale(pygame.image.load('Other Art/LavaGround.png'), [width, height])
         self.image.set_colorkey((0, 0, 0))
@@ -385,8 +385,9 @@ class FireStorm(Ability):
 
         self.from_player = from_player
 
-        # 608, 368 is Center of character. Subtract 32 to both since the width/height of FireStorm is 64.
-        self.rect = Rect(list(map(lambda x, y: x + y, (608- width/2, 368-height/2), player_to_click)) + [width, height])
+        # 640, 400 is Center of character.
+        adjustment = list(map(lambda x, y, z: x + y + z, (640, 400), player_to_click, (-width/2, -height/2)))
+        self.rect = self.image.get_rect().move(adjustment)
 
         self.cooldown = FireStorm.calc_cooldown(ability_level, from_player)
 

@@ -26,7 +26,7 @@ Some things to take a next step:
     - Put some thought into FireStorm. Something is off about it.
         - Probably needs to work similar to PoE's fire trap, it's too powerful if you can spam it.
             - But also sucks too much with just a normal long cooldown?
-            
+
 
     - Controls. Right click to level up just isn't worth the right click.
         - Consider transfering game to PoE system of movement and using abilities.
@@ -35,14 +35,12 @@ Some things to take a next step:
         - Handling inventory
             - Reuse ability manager to hold equipment.
     - Bug Fixes
-        - Monsters should always be above the FireStorm is not centering on click..
-        - FireStorm is not centering on click.
+        - Monsters should always be above the FireStorm
 
     - Feedback
         - Melee underpowered, range op. Monsters too easy.
         - Aadit
             - Range underpowered, he likes lightning, increase range of attack/sweep.
-
 
 
     - Make this games positions not hardcoded. Only set for 1280 by 800 pixels right now.
