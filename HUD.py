@@ -2,6 +2,7 @@ import pygame
 from pygame.locals import *
 
 import Sword as S
+import Items
 
 # Used for determining if MOUSEBUTTONDOWN was a left or right click.
 LEFT = 1
@@ -74,8 +75,6 @@ class Menu:
         # Make numbers for ability hotkeys.
         self.font = pygame.font.Font(None, 26)
         self.hotkey_texts = [self.font.render(str(i), True, (100, 200, 200)) for i in range(1, 5)]
-
-
 
 
     def active_image_clicked(self, click_pos: tuple):
@@ -170,9 +169,9 @@ class Inventory(Menu):
 
         self.ability = None # Remove this soon.
 
-        self.elements = {0: S.Attack, 1: None, 2: None, 3: None, 4: None, 5: None,
+        self.elements = {0: None, 1: None, 2: None, 3: None, 4: None, 5: None,
                                 6: None, 7: None, 8: S.ToughenUp, 9: None, 10: None,
-                                11: None, 12: None, 13: None, 14: None, 15: None,
+                                11: Items.Armor, 12: None, 13: None, 14: None, 15: None,
                                 16: None, 17: None, 18: None, 19: S.Lightning}
 
         ### The following images are here for testing inventory behavior. ###
@@ -191,7 +190,7 @@ class Inventory(Menu):
         self.element_images = {S.ToughenUp: toughen_image, S.Attack: attack_image,
                                S.Sweep: sweep_image, S.Arrow: arrow_image,
                                S.SplitShot: splitshot_image, S.Lightning: lightning_image,
-                               S.FireStorm: firestorm_image}
+                               S.FireStorm: firestorm_image, Items.Armor: attack_image}
         ### End
 
     def draw(self, screen, ability_levels):
@@ -202,10 +201,10 @@ class Inventory(Menu):
         self._draw_abilities(screen)
 
     def _highlight_element_to_move(self, screen):
-        if self.element_to_move is not None:
+        if self.element_to_move is not None and self.menu_up:
             pygame.draw.rect(screen, (100, 200, 100), self.positions[self.element_to_move], 0)
 
-    def handle_click(self, event):
+    def handle_click(self, event, ability_levels):
         if event.button == LEFT:
             if self.menu_up:
                 test_index = self.menu_ability_clicked(event.pos)
@@ -216,6 +215,10 @@ class Inventory(Menu):
                         self.ready_to_swap = True
                         self.element_to_move = test_index[1]
                     else:
+                        # if self.element is 0-3, call enter on self.elements[test_index[1]]
+                        # and call leave on self.elements[self.element_to_move]
+
+
                         self.elements[self.element_to_move], self.elements[test_index[1]]\
                             = self.elements[test_index[1]], self.elements[self.element_to_move]
                         self.ready_to_swap = False

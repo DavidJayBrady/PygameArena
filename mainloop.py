@@ -155,7 +155,7 @@ class GameState:
                              self.character.ability_levels[ability_leveled] += 1
                              self.character.increment_maxes()
                     elif Rect(880, 640, 370, 115).collidepoint(event.pos) or (self.inventory.menu_up and Rect(880, 280, 370, 360).collidepoint(event.pos)):
-                         self.inventory.handle_click(event)
+                         self.inventory.handle_click(event, self.character.ability_levels)
                     else:
                         self.ability_manager.menu_up = False
                         self.inventory.menu_up = False
