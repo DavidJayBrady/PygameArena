@@ -145,8 +145,7 @@ class Character(Mover):
             return True
 
     def increment_maxes(self):
-        current_max_health = self.max_health
         health_change = 50
         self.max_health = 700 + (health_change * self.ability_levels[S.ToughenUp])
-        if current_max_health != self.max_health:
-            self.health += health_change
+        if self.health > self.max_health:
+            self.health = self.max_health

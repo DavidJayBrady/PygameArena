@@ -19,10 +19,6 @@ from Sword import FRAME_RATE
 
 '''
 Some things to take a next step:
-    - Ensure game runs the same no matter the frame rate.
-        - It doesn't right now, and DOTS depend on it.
-
-
     - Put some thought into FireStorm. Something is off about it.
         - Probably needs to work similar to PoE's fire trap, it's too powerful if you can spam it.
             - But also sucks too much with just a normal long cooldown?
@@ -154,6 +150,7 @@ class GameState:
                              self.character.increment_maxes()
                     elif Rect(880, 640, 370, 115).collidepoint(event.pos) or (self.inventory.menu_up and Rect(880, 280, 370, 360).collidepoint(event.pos)):
                          self.inventory.handle_click(event, self.character.ability_levels)
+                         self.character.increment_maxes() # If Item that boost ToughenUp is equipped, health needs to change.
                     else:
                         self.ability_manager.menu_up = False
                         self.inventory.menu_up = False

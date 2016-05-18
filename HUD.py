@@ -203,6 +203,20 @@ class Inventory(Menu):
         if self.element_to_move is not None and self.menu_up:
             pygame.draw.rect(screen, (100, 200, 100), self.positions[self.element_to_move], 0)
 
+
+    # The following 2 methods prevent Attribute errors from calling a method on None.
+    def _call_safe_enter(self, index, ability_levels):
+        try:
+            self.elements[index].on_active_enter(ability_levels)
+        except AttributeError:
+            pass
+
+    def _call_safe_leave(self, index, ability_levels):
+        try:
+            self.elements[index].on_active_leave(ability_levels)
+        except AttributeError:
+            pass
+
     def handle_click(self, event, ability_levels):
         if event.button == LEFT:
             if self.menu_up:
@@ -214,15 +228,12 @@ class Inventory(Menu):
                         self.ready_to_swap = True
                         self.element_to_move = test_index[1]
                     else:
-                        if self.element_to_move in (0, 1, 2, 3):
-                            try:
-                                self.elements[test_index[1]].on_active_enter(ability_levels)
-                            except AttributeError:
-                                pass
-                            try:
-                                self.elements[self.element_to_move].on_active_leave(ability_levels)
-                            except AttributeError:
-                                pass
+                        if self.element_to_move in (0, 1, 2, 3) and test_index[1] not in (0, 1, 2, 3):
+                            self._call_safe_leave(self.element_to_move, ability_levels)
+                            self._call_safe_enter(test_index[1], ability_levels)
+                        elif self.element_to_move not in (0, 1, 2, 3) and test_index[1] in (0, 1, 2, 3):
+                            self._call_safe_enter(self.element_to_move, ability_levels)
+                            self._call_safe_leave(test_index[1], ability_levels)
 
                         self.elements[self.element_to_move], self.elements[test_index[1]]\
                             = self.elements[test_index[1]], self.elements[self.element_to_move]

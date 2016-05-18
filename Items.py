@@ -43,7 +43,7 @@ class Armor(Item):
 
     @staticmethod
     def on_active_enter(ability_levels):
-        ability_levels[Armor.ability_to_buff] = Armor.levels_to_buff
+        ability_levels[Armor.ability_to_buff] += Armor.levels_to_buff
 
     @staticmethod
     def on_active_leave(ability_levels):
