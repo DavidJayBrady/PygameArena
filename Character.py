@@ -16,6 +16,9 @@ class Character(Mover):
         self.ability_levels = {S.Attack: 1, S.Sweep: 1, S.Arrow: 1, S.SplitShot: 1, S.Lightning: 1,
                                S.FireStorm: 1, S.ToughenUp: 1, Items.Armor: None}
 
+        #self.inventory = Items.Inventory()
+
+
         self.from_player = True
 
         scale_factor = [64, 64]
@@ -133,7 +136,7 @@ class Character(Mover):
 
     def recover(self, elapsed_time):
         if self.health < self.max_health:
-            self.health += (.01 + (.004 * self.ability_levels[S.ToughenUp])) * elapsed_time
+            self.health += S.ToughenUp.calc_regen(self.ability_levels[S.ToughenUp], elapsed_time)
         if self.energy < self.max_energy:
             self.energy += .01 * elapsed_time
 

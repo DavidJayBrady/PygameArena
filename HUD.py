@@ -186,10 +186,13 @@ class Inventory(Menu):
         firestorm_image = load_and_scale('Other Art/Fireball.png')
         firestorm_image.set_colorkey((0, 0 , 0))
 
+        # This image just doesn't fit the theme well.
+        armor_image = load_and_scale("Items/Light_Armor_Leather.png")
+
         self.element_images = {S.ToughenUp: toughen_image, S.Attack: attack_image,
                                S.Sweep: sweep_image, S.Arrow: arrow_image,
                                S.SplitShot: splitshot_image, S.Lightning: lightning_image,
-                               S.FireStorm: firestorm_image, Items.Armor: attack_image}
+                               S.FireStorm: firestorm_image, Items.Armor: armor_image}
         ### End
 
     def draw(self, screen, ability_levels):

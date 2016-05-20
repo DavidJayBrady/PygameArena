@@ -71,8 +71,12 @@ class ToughenUp(Ability):
         return 700 + (50 * ability_level)
 
     @staticmethod
-    def calc_hp_regen(ability_level): # If I change this method, also change character increment_maxes method.
-        return round((.1 + (.05 * ability_level) * FRAME_RATE), 1)
+    def calc_regen(ability_level, elapsed_time):
+        return round((.01 + (.004 * ability_level)) * elapsed_time)
+
+    @staticmethod
+    def calc_hp_regen_persec(ability_level): # If I change this method, also change character increment_maxes method.
+        return round((.01 + (.004 * ability_level)) * 1000)
 
 
 
@@ -83,7 +87,7 @@ class ToughenUp(Ability):
         stats[FONT.render("Level: "+str(ability_level), True, type.info_color)] = adjust(detail_box, (130, 10))
         stats[FONT.render("Type: " +str(type.ability_type), True, type.info_color)] = adjust(detail_box, (215, 10))
         stats[FONT.render("Endurance: "+str(type.calc_hp(ability_level)), True, type.info_color)] = adjust(detail_box, (10, 50))
-        stats[FONT.render("Regen: "+str(type.calc_hp_regen(ability_level)), True, type.info_color)] = adjust(detail_box, (160, 50))
+        stats[FONT.render("Regen: "+ str(type.calc_hp_regen_persec(ability_level)), True, type.info_color)] = adjust(detail_box, (160, 50))
         stats[FONT.render(type.description, True, type.info_color)] = adjust(detail_box, (10, 80))
         return stats
 
