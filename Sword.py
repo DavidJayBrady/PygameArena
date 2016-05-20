@@ -7,7 +7,6 @@ Ability Ideas:
 FRAME_RATE = 20
 
 import pygame
-from pygame.locals import *
 
 from SpriteSheet import SpriteSheet
 
@@ -67,18 +66,17 @@ class ToughenUp(Ability):
         Ability.__init__(self)
 
     @staticmethod
-    def calc_hp(ability_level): # If I change this method, also change character recover method.
-        return 700 + (50 * ability_level)
+    def calc_hp(ability_level):
+        return 50 * ability_level
 
     @staticmethod
-    def calc_regen(ability_level, elapsed_time):
-        return round((.01 + (.004 * ability_level)) * elapsed_time)
+    def calc_health_regen(ability_level):
+        # Scale by 4 each level.
+        return .004 * ability_level
 
     @staticmethod
-    def calc_hp_regen_persec(ability_level): # If I change this method, also change character increment_maxes method.
-        return round((.01 + (.004 * ability_level)) * 1000)
-
-
+    def calc_hp_regen_persec(ability_level):
+        return round(ToughenUp.calc_health_regen(ability_level) * 1000)
 
     @staticmethod
     def gather_statistics(type, ability_level, detail_box):
@@ -91,6 +89,37 @@ class ToughenUp(Ability):
         stats[FONT.render(type.description, True, type.info_color)] = adjust(detail_box, (10, 80))
         return stats
 
+class Wisen(Ability):
+    name = "Wisen"
+    ability_type = "passive"
+    description = "Increases Energy capacity and regeneration."
+    name_color = PASSIVE_COLOR
+    info_color = PASSIVE_INFO_COLOR
+    def __init__(self, player_to_click, sprite_cord, from_player, ability_level):
+        Ability.__init__(self)
+
+    @staticmethod
+    def calc_energy(ability_level):
+        return 50 * ability_level
+
+    @staticmethod
+    def calc_energy_regen(ability_level):
+        return .004 * ability_level
+
+    @staticmethod
+    def calc_energy_regen_persec(ability_level):
+         return round(Wisen.calc_energy_regen(ability_level) * 1000)
+
+    @staticmethod
+    def gather_statistics(type, ability_level, detail_box):
+        stats = {}
+        stats[FONT.render(type.name, True, type.name_color)] = adjust(detail_box, (10, 10))
+        stats[FONT.render("Level: "+str(ability_level), True, type.info_color)] = adjust(detail_box, (130, 10))
+        stats[FONT.render("Type: " +str(type.ability_type), True, type.info_color)] = adjust(detail_box, (215, 10))
+        stats[FONT.render("Endurance: "+str(type.calc_energy(ability_level)), True, type.info_color)] = adjust(detail_box, (10, 50))
+        stats[FONT.render("Regen: "+ str(type.calc_energy_regen_persec(ability_level)), True, type.info_color)] = adjust(detail_box, (160, 50))
+        stats[FONT.render(type.description, True, type.info_color)] = adjust(detail_box, (10, 80))
+        return stats
 
 class Attack(Ability):
 

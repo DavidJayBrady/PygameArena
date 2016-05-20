@@ -267,13 +267,16 @@ class AbilityManager(Menu):
         firestorm_image = load_and_scale('Other Art/Fireball.png')
         firestorm_image.set_colorkey((0, 0 , 0))
 
+        wisen_image = load_and_scale("Other Art/Wisen.png")
+
         self.element_images = {S.ToughenUp: toughen_image, S.Attack: attack_image,
                                S.Sweep: sweep_image, S.Arrow: arrow_image,
                                S.SplitShot: splitshot_image, S.Lightning: lightning_image,
-                               S.FireStorm: firestorm_image}
+                               S.FireStorm: firestorm_image, S.Wisen: wisen_image}
 
         self.element_names = {S.ToughenUp: "Toughen Up", S.Attack: "Strike", S.Sweep: "Sweep", S.Arrow: 'SingleShot',
-                              S.SplitShot: "Splitshot", S.Lightning: "Lightning", S.FireStorm: "FireStorm"}
+                              S.SplitShot: "Splitshot", S.Lightning: "Lightning", S.FireStorm: "FireStorm",
+                              S.Wisen: "Wisen"}
 
         # Belongs in character, but only single player game, so does not matter and is more convenient here.
         self.ability_points = 3
@@ -282,7 +285,7 @@ class AbilityManager(Menu):
 
         self.elements = {0: S.Attack, 1: S.Sweep, 2: S.Arrow, 3: S.SplitShot, 4: S.Attack, 5: S.Sweep,
                                 6: S.Arrow, 7: S.SplitShot, 8: S.Lightning, 9: S.FireStorm, 10: S.ToughenUp,
-                                11: None, 12: None, 13: None, 14: None, 15: None}
+                                11: S.Wisen, 12: None, 13: None, 14: None, 15: None}
 
         # Generate a dictionary, keys 0-15, with each value being a Rect, or a location.
         # Shape is as follows.

@@ -19,6 +19,11 @@ from Sword import FRAME_RATE
 
 '''
 Some things to take a next step:
+    - Change how recovering is calculated. Currently in ToughenUp,
+        but it belongs in chaacter, because both ToughenUp level and items may affect health/health regen.
+            - ToughenUp need not show total regen, only regen from ability. Total regen can be in something else,
+            say, a character sheet.
+
     - Put some thought into FireStorm. Something is off about it.
         - Probably needs to work similar to PoE's fire trap, it's too powerful if you can spam it.
             - But also sucks too much with just a normal long cooldown?
@@ -86,7 +91,6 @@ class GameState:
                                                                             (RangeMonster, 25)))
 
         self.ability_manager = AbilityManager()
-        self.inventory = Inventory()
 
         # So we can call each monster's attack method.
         self.monster_group = PgGroup(self.monsters)
@@ -139,7 +143,7 @@ class GameState:
                         if self.ability_manager.elements[hotkey] is not None:
                             self.ability_manager.ability = self.ability_manager.elements[hotkey]
                     elif event.key == K_i:
-                        self.inventory.menu_up = not self.inventory.menu_up
+                        self.character.inventory.menu_up = not self.character.inventory.menu_up
                     else:
                         Mover.handle_character_event(event, True)
                 elif event.type == MOUSEBUTTONDOWN:
@@ -148,12 +152,12 @@ class GameState:
                          if ability_leveled:
                              self.character.ability_levels[ability_leveled] += 1
                              self.character.increment_maxes()
-                    elif Rect(880, 640, 370, 115).collidepoint(event.pos) or (self.inventory.menu_up and Rect(880, 280, 370, 360).collidepoint(event.pos)):
-                         self.inventory.handle_click(event, self.character.ability_levels)
+                    elif Rect(880, 640, 370, 115).collidepoint(event.pos) or (self.character.inventory.menu_up and Rect(880, 280, 370, 360).collidepoint(event.pos)):
+                         self.character.inventory.handle_click(event, self.character.ability_levels)
                          self.character.increment_maxes() # If Item that boost ToughenUp is equipped, health needs to change.
                     else:
                         self.ability_manager.menu_up = False
-                        self.inventory.menu_up = False
+                        self.character.inventory.menu_up = False
                         weapon = self.character.attack(event.pos, self.ability_manager.ability)
                         if weapon != None:
                             self.all_but_background.add(weapon) # For collisions
@@ -187,7 +191,7 @@ class GameState:
             PgGroup.draw_monster_bars(self.monsters, self.screen)
 
             self.ability_manager.draw(self.screen, self.character.ability_levels)
-            self.inventory.draw(self.screen, self.character.ability_levels)
+            self.character.inventory.draw(self.screen, self.character.ability_levels)
 
             pygame.display.update()
             elapsed_time = self.my_clock.tick(FRAME_RATE)

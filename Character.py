@@ -1,6 +1,7 @@
 import pygame
 from SpriteSheet import SpriteSheet
 from HUD import Bar
+from HUD import Inventory
 from Mover import Mover
 import Sword as S
 import Items
@@ -14,10 +15,9 @@ class Character(Mover):
         self.level_experience = 1000
 
         self.ability_levels = {S.Attack: 1, S.Sweep: 1, S.Arrow: 1, S.SplitShot: 1, S.Lightning: 1,
-                               S.FireStorm: 1, S.ToughenUp: 1, Items.Armor: None}
+                               S.FireStorm: 1, S.ToughenUp: 1, S.Wisen: 1, Items.Armor: None}
 
-        #self.inventory = Items.Inventory()
-
+        self.inventory = Inventory()
 
         self.from_player = True
 
@@ -56,8 +56,11 @@ class Character(Mover):
 
         self.max_health = 700
         self.health = 700
-        self.max_energy = 300
+        self.max_energy = 250
         self.energy = 200
+
+        self.base_health_regen = .01
+        self._base_energy_regen = .01
 
         self.uses_caps = True # Drawing health bar utility.
 
@@ -136,9 +139,9 @@ class Character(Mover):
 
     def recover(self, elapsed_time):
         if self.health < self.max_health:
-            self.health += S.ToughenUp.calc_regen(self.ability_levels[S.ToughenUp], elapsed_time)
+            self.health += self.calc_health_regen(elapsed_time)
         if self.energy < self.max_energy:
-            self.energy += .01 * elapsed_time
+            self.energy += self.calc_energy_regen(elapsed_time)
 
     def level_up(self):
         if self.experience > self.level_experience:
@@ -147,8 +150,19 @@ class Character(Mover):
             self.level_experience += 200
             return True
 
+    def calc_health_regen(self, elapsed_time):
+        # The + 0 is there as a reminder that eventually items will contribute to health regeneration..
+        # self._base_health_regen accounts for 10 health regen per second. Each level of ToughenUp is 4.
+        return (self.base_health_regen + (S.ToughenUp.calc_health_regen(self.ability_levels[S.ToughenUp])) + 0) * elapsed_time
+
+    def calc_energy_regen(self, elapsed_time):
+        return self._base_energy_regen + (S.Wisen.calc_energy_regen(self.ability_levels[S.Wisen])) * elapsed_time
+        
+
     def increment_maxes(self):
-        health_change = 50
-        self.max_health = 700 + (health_change * self.ability_levels[S.ToughenUp])
+        change = 50
+        self.max_health = 700 + (change * self.ability_levels[S.ToughenUp])
         if self.health > self.max_health:
             self.health = self.max_health
+        self.max_energy = 250 + (change * self.ability_levels[S.Wisen])
+
