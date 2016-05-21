@@ -404,8 +404,6 @@ class FireStorm(Ability):
     name_color = MAGIC_COLOR
     info_color = MAGIC_INFO_COLOR
 
-    delta_time = (1/FRAME_RATE) * 1000
-
     initial_damage = .025
     scale_damage = .008
 
@@ -424,6 +422,8 @@ class FireStorm(Ability):
 
         self.from_player = from_player
 
+        self.delta_time = (1/FRAME_RATE) * 1000
+
         # 640, 400 is Center of character.
         adjustment = list(map(lambda x, y, z: x + y + z, (640, 400), player_to_click, (-width/2, -height/2)))
         self.rect = self.image.get_rect().move(adjustment)
@@ -432,7 +432,7 @@ class FireStorm(Ability):
 
         self.energy_consume = FireStorm.calc_energy_consume(ability_level, from_player)
 
-        self.damage = FireStorm.calc_damage(ability_level, from_player)
+        self.damage = self.calc_damage(ability_level, from_player)
 
         self.dead = False
 
@@ -447,10 +447,9 @@ class FireStorm(Ability):
     def update(self, character_velocity, char_rect, elapsed_time):
         self.rect.move_ip(character_velocity[0], character_velocity[1])
 
-        # Whoops! This will share between all firestorms
-        FireStorm.delta_time = pygame.time.get_ticks() - self.current_time
+        self.delta_time = pygame.time.get_ticks() - self.current_time
 
-        self.lifetime -= FireStorm.delta_time
+        self.lifetime -= self.delta_time
 
         self.current_time = pygame.time.get_ticks()
         if self.lifetime < 0:
@@ -459,9 +458,9 @@ class FireStorm(Ability):
     def is_dead(self):
         return self.dead
 
-    @staticmethod
-    def calc_damage(ability_level, from_player):
-        return (FireStorm.initial_damage + (ability_level * FireStorm.scale_damage)) * FireStorm.delta_time
+
+    def calc_damage(self, ability_level, from_player):
+        return (FireStorm.initial_damage + (ability_level * FireStorm.scale_damage)) * self.delta_time
 
     @staticmethod
     def calc_dps(ability_level):
