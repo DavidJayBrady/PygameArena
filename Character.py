@@ -4,7 +4,6 @@ from HUD import Bar
 from HUD import Inventory
 from Mover import Mover
 import Sword as S
-import Items
 
 class Character(Mover):
     def __init__(self, gamestate_area):
@@ -14,8 +13,8 @@ class Character(Mover):
         self.experience = 1
         self.level_experience = 1000
 
-        self.ability_levels = {S.Attack: 1, S.Sweep: 1, S.Arrow: 1, S.SplitShot: 1, S.Lightning: 1,
-                               S.FireStorm: 1, S.ToughenUp: 1, S.Wisen: 1, Items.Armor: None}
+        self.ability_levels = {S.Attack: 1, S.Sweep: 0, S.Arrow: 0, S.SplitShot: 0, S.Lightning: 0,
+                               S.FireStorm: 0, S.ToughenUp: 0, S.Wisen: 0}
 
         self.inventory = Inventory()
 
@@ -54,10 +53,13 @@ class Character(Mover):
         # Used to limit attacks per second.
         self.timer = pygame.time.get_ticks()
 
+        self.start_max_health = 700
+        self.start_max_energy = 250
+
         self.max_health = 700
         self.health = 700
         self.max_energy = 250
-        self.energy = 200
+        self.energy = 250
 
         self.base_health_regen = .01
         self._base_energy_regen = .01
@@ -79,7 +81,7 @@ class Character(Mover):
         weapon = attack_type(player_to_click, self.rect, True, self.ability_levels[attack_type])
 
         try: # For when FireStorm is too far and returns None when weapon is created.
-            if pygame.time.get_ticks() - self.timer > weapon.cooldown: # Limit attacks per second based on ability.
+            if pygame.time.get_ticks() - self.timer > weapon.cooldown and self.ability_levels[attack_type] > 0:
                 if not self.energy - weapon.energy_consume < 0:
                     self.timer = pygame.time.get_ticks()
                     self.energy -= weapon.energy_consume
@@ -161,8 +163,8 @@ class Character(Mover):
 
     def increment_maxes(self):
         change = 50
-        self.max_health = 700 + (change * self.ability_levels[S.ToughenUp])
+        self.max_health = self.start_max_health + (change * self.ability_levels[S.ToughenUp])
         if self.health > self.max_health:
             self.health = self.max_health
-        self.max_energy = 250 + (change * self.ability_levels[S.Wisen])
+        self.max_energy = self.start_max_energy + (change * self.ability_levels[S.Wisen])
 

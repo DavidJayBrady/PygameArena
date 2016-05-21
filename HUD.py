@@ -118,7 +118,7 @@ class Menu:
 
     def _draw_ability_details(self, screen, index, ability_levels, area_from: str):
         if area_from == "ability manager":
-            position = Rect(30, 235 + ((self.rows - 1) * 100), 300, 50) if not self.menu_up else Rect(30, 245, 300, 50)
+            position = Rect(30, 225 + ((self.rows - 1) * 100), 300, 50) if not self.menu_up else Rect(30, 235, 300, 50)
         elif area_from == "inventory":
             position = Rect(880, 135 + ((self.rows - 1) * 100), 300, 50) if not self.menu_up else Rect(880, 165, 300, 50)
 
@@ -253,7 +253,7 @@ class AbilityManager(Menu):
         self.menu_background_rect = Rect(30, 640, 370, 115)
 
         self.menu_up_background_image = pygame.transform.smoothscale(self.menu_background_image, [370, 300])
-        self.menu_up_background_rect = (30, 360, 370, 300)
+        self.menu_up_background_rect = (30, 350, 370, 300)
 
         load_and_scale = lambda x: pygame.transform.smoothscale(pygame.image.load(x), [80, 80])
 
@@ -305,6 +305,7 @@ class AbilityManager(Menu):
 
 
     def draw(self, screen, ability_levels):
+        self._grey_out(screen, ability_levels)
 
         self._paint_ability_info(screen, ability_levels, "ability manager")
 
@@ -315,6 +316,14 @@ class AbilityManager(Menu):
         if self.ability_points > 0:
             extra_text = ' ability point to spend' if self.ability_points == 1 else ' ability points to spend'
             screen.blit(self.font.render(str(self.ability_points) + extra_text, True, (120, 200, 160)),[50, 140])
+
+    def _grey_out(self, screen, ability_levels):
+        # Slightly grey unleveled abilities, marking them unusable.
+        iterate_part = 4 if not self.menu_up else len(self.positions)
+        for index in range(iterate_part):
+            if self.elements[index] and ability_levels[self.elements[index]] == 0:
+                pygame.draw.rect(screen, (180, 75, 75), self.positions[index], 0)
+
 
     def _draw_hotkey_details(self, screen, ability_levels):
 
