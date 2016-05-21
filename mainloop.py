@@ -47,6 +47,8 @@ Some things to take a next step:
     - Make this games positions not hardcoded. Only set for 1280 by 800 pixels right now.
 '''
 
+LEFT = 1
+RIGHT = 3
 
 
 class PgGroup(pygame.sprite.Group):
@@ -104,6 +106,8 @@ class GameState:
                           'move': 0, 'clear/recover': 0, 'drawbars': 0}
         self.loop_counter = 0
 
+        self.find_key = {K_LSHIFT: 0, K_SPACE: 1, LEFT: 2, RIGHT: 3}
+
     def clear_weapon(self):
         # If sword is on screen, clear it off.
         for sprite in self.all_but_background:
@@ -136,12 +140,12 @@ class GameState:
                 if event.type == KEYUP:
                     Mover.handle_character_event(event, False)
                 elif event.type == KEYDOWN:
-                    if event.key == K_1 or event.key == K_2 or event.key == K_3 or event.key == K_4:
-                        hotkey = event.key - 49 # printing out event.key gives 49, 50, 51, 52; for K_1, K_2...
-                        if self.character.ability_manager.elements[hotkey] is not None:
-                            self.character.ability_manager.ability = self.character.ability_manager.elements[hotkey]
-                    elif event.key == K_i:
-                        self.character.inventory.menu_up = not self.character.inventory.menu_up
+                    if event.key == K_LSHIFT or event.key == K_SPACE:
+                        key = self.find_key[event.key]
+                        weapon = self.character.attack(pygame.mouse.get_pos(), self.character.ability_manager.elements[key])
+                        if weapon is not None:
+                            self.all_but_background.add(weapon) # For collisions
+                            self.all_sprites.add(weapon) # For movement
                     else:
                         Mover.handle_character_event(event, True)
                 elif event.type == MOUSEBUTTONDOWN:
@@ -156,11 +160,12 @@ class GameState:
                     else:
                         self.character.ability_manager.menu_up = False
                         self.character.inventory.menu_up = False
-                        weapon = self.character.attack(event.pos, self.character.ability_manager.ability)
-                        if weapon is not None:
-                            self.all_but_background.add(weapon) # For collisions
-                            self.all_sprites.add(weapon) # For movement
-
+                        if event.button == LEFT or event.button == RIGHT:
+                             key = self.find_key[event.button]
+                             weapon = self.character.attack(event.pos, self.character.ability_manager.elements[key])
+                             if weapon is not None:
+                                 self.all_but_background.add(weapon) # For collisions
+                                 self.all_sprites.add(weapon) # For movement
 
             self.screen.fill((0, 0, 0))
 

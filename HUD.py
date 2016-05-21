@@ -73,8 +73,11 @@ class Menu:
         self.index_clicked = None
 
         # Make numbers for ability hotkeys.
-        self.font = pygame.font.Font(None, 26)
-        self.hotkey_texts = [self.font.render(str(i), True, (100, 200, 200)) for i in range(1, 5)]
+        self.font = pygame.font.Font(None, 22)
+
+
+        text = ["Sft", "Spc", "Ml", "Mr"]
+        self.hotkey_texts = [self.font.render(text[i], True, (100, 200, 200)) for i in range(4)]
 
 
     def active_image_clicked(self, click_pos: tuple):
@@ -91,7 +94,6 @@ class Menu:
 
     def _change_element(self, index):
         self.elements[self.index_clicked] = self.elements[index]
-
 
     def _paint_ability_info(self, screen, ability_levels, detail_position):
         # Highlight scrolled over picture in menu and paint their details above.
@@ -242,7 +244,9 @@ class Inventory(Menu):
                             = self.elements[test_index[1]], self.elements[self.element_to_move]
                         self.ready_to_swap = False
                         self.element_to_move = None
-
+            else:
+                if self.active_image_clicked(event.pos):
+                    self.menu_up = not self.menu_up
 
 class AbilityManager(Menu):
     def __init__(self):
@@ -330,7 +334,7 @@ class AbilityManager(Menu):
         for i in range(4): # Draw ability details. Hotkey at top left, "Level x" at bottom mid.
             try:
                 text = self.font.render("Level " + str(ability_levels[self.elements[i]]), True, (100, 200, 200))
-                text_pos = list(map(lambda x, y: x - y, self.positions[i].bottomright, [70, 0]))
+                text_pos = list(map(lambda x, y: x - y, self.positions[i].bottomright, [70, -3]))
                 screen.blit(self.hotkey_texts[i], self.positions[i].topleft)
                 screen.blit(text, text_pos)
             except KeyError:

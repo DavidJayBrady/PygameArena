@@ -39,7 +39,7 @@ class Monster(Mover):
         self.walk_counter = 0            # Keep monsters from changing directions constantly
 
         # Speed is used for finding direction. Velocity already contains that direction.
-        self.speed = [2, 2]
+        self.speed = [3, 3]
         self.velocity = pygame.math.Vector2(self.speed)
 
         self.health = 90 + (25 * self.level)
@@ -188,7 +188,7 @@ class ChampionMeleeMonster(Monster):
         self.load_images(monster_images)
 
         # Speed is used for finding direction. Velocity already contains that direction.
-        self.speed = [3, 3]
+        self.speed = [5, 5]
         self.velocity = pygame.math.Vector2(self.speed)
 
         self.health = 150 + (30 * self.level)
