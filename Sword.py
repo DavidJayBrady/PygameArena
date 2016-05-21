@@ -447,6 +447,7 @@ class FireStorm(Ability):
     def update(self, character_velocity, char_rect, elapsed_time):
         self.rect.move_ip(character_velocity[0], character_velocity[1])
 
+        # Whoops! This will share between all firestorms
         FireStorm.delta_time = pygame.time.get_ticks() - self.current_time
 
         self.lifetime -= FireStorm.delta_time

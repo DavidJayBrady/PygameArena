@@ -2,6 +2,7 @@ import pygame
 from SpriteSheet import SpriteSheet
 from HUD import Bar
 from HUD import Inventory
+from HUD import AbilityManager
 from Mover import Mover
 import Sword as S
 
@@ -16,6 +17,7 @@ class Character(Mover):
         self.ability_levels = {S.Attack: 1, S.Sweep: 0, S.Arrow: 0, S.SplitShot: 0, S.Lightning: 0,
                                S.FireStorm: 0, S.ToughenUp: 0, S.Wisen: 0}
 
+        self.ability_manager = AbilityManager()
         self.inventory = Inventory()
 
         self.from_player = True
@@ -134,10 +136,12 @@ class Character(Mover):
     def is_dead(self) -> bool:
         return self.health <= 0
 
-    def draw_bars(self, screen):
+    def draw_hud(self, screen):
         self.healthbar.draw_health_bar(screen, self.rect, self.health, self.max_health)
         self.energybar.draw_health_bar(screen, self.rect, self.energy, self.max_energy)
         self.experiencebar.draw_health_bar(screen, self.rect, self.experience, self.level_experience)
+        self.ability_manager.draw(screen, self.ability_levels)
+        self.inventory.draw(screen, self.ability_levels)
 
     def recover(self, elapsed_time):
         if self.health < self.max_health:
@@ -158,7 +162,7 @@ class Character(Mover):
         return (self.base_health_regen + (S.ToughenUp.calc_health_regen(self.ability_levels[S.ToughenUp])) + 0) * elapsed_time
 
     def calc_energy_regen(self, elapsed_time):
-        return self._base_energy_regen + (S.Wisen.calc_energy_regen(self.ability_levels[S.Wisen])) * elapsed_time
+        return (self._base_energy_regen + (S.Wisen.calc_energy_regen(self.ability_levels[S.Wisen]))) * elapsed_time
         
 
     def increment_maxes(self):

@@ -90,8 +90,6 @@ class GameState:
         self.monsters = Monster.spawn_monsters(self.character, self.walls, ((ChampionMeleeMonster, 15), (Monster, 30),
                                                                             (RangeMonster, 25)))
 
-        self.ability_manager = AbilityManager()
-
         # So we can call each monster's attack method.
         self.monster_group = PgGroup(self.monsters)
 
@@ -121,7 +119,7 @@ class GameState:
                     if isinstance(sprite, Monster):
                         self.character.experience += sprite.exp_value
                         if self.character.level_up():
-                            self.ability_manager.ability_points += 1
+                            self.character.ability_manager.ability_points += 1
                     elif type(sprite) is Character:
                         exit()
 
@@ -140,15 +138,15 @@ class GameState:
                 elif event.type == KEYDOWN:
                     if event.key == K_1 or event.key == K_2 or event.key == K_3 or event.key == K_4:
                         hotkey = event.key - 49 # printing out event.key gives 49, 50, 51, 52; for K_1, K_2...
-                        if self.ability_manager.elements[hotkey] is not None:
-                            self.ability_manager.ability = self.ability_manager.elements[hotkey]
+                        if self.character.ability_manager.elements[hotkey] is not None:
+                            self.character.ability_manager.ability = self.character.ability_manager.elements[hotkey]
                     elif event.key == K_i:
                         self.character.inventory.menu_up = not self.character.inventory.menu_up
                     else:
                         Mover.handle_character_event(event, True)
                 elif event.type == MOUSEBUTTONDOWN:
-                    if Rect(30, 640, 370, 100).collidepoint(event.pos) or (self.ability_manager.menu_up and Rect(30, 360, 370, 300).collidepoint(event.pos)):
-                         ability_leveled =  self.ability_manager.handle_click(event)
+                    if Rect(30, 640, 370, 100).collidepoint(event.pos) or (self.character.ability_manager.menu_up and Rect(30, 360, 370, 300).collidepoint(event.pos)):
+                         ability_leveled =  self.character.ability_manager.handle_click(event)
                          if ability_leveled:
                              self.character.ability_levels[ability_leveled] += 1
                              self.character.increment_maxes()
@@ -156,10 +154,10 @@ class GameState:
                          self.character.inventory.handle_click(event, self.character.ability_levels)
                          self.character.increment_maxes() # If Item that boost ToughenUp is equipped, health needs to change.
                     else:
-                        self.ability_manager.menu_up = False
+                        self.character.ability_manager.menu_up = False
                         self.character.inventory.menu_up = False
-                        weapon = self.character.attack(event.pos, self.ability_manager.ability)
-                        if weapon != None:
+                        weapon = self.character.attack(event.pos, self.character.ability_manager.ability)
+                        if weapon is not None:
                             self.all_but_background.add(weapon) # For collisions
                             self.all_sprites.add(weapon) # For movement
 
@@ -176,22 +174,15 @@ class GameState:
 
             self.all_sprites.update(self.character.velocity, self.character.rect, elapsed_time)
 
-            # Collisions should be after update so can check for collisions between sword/monster/player.
-
-
             PgGroup.draw(self.screen, self.background, self.all_but_background)
+
             self.clear_weapon() # Must be after draw. Keep at end of loop, since attack happens in event for loop.
             self.clear_dead()
 
             self.character.recover(elapsed_time)
 
-            # Draw the HUD
-            self.character.draw_bars(self.screen)
-
+            self.character.draw_hud(self.screen)
             PgGroup.draw_monster_bars(self.monsters, self.screen)
-
-            self.ability_manager.draw(self.screen, self.character.ability_levels)
-            self.character.inventory.draw(self.screen, self.character.ability_levels)
 
             pygame.display.update()
             elapsed_time = self.my_clock.tick(FRAME_RATE)
