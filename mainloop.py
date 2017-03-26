@@ -135,6 +135,7 @@ class GameState:
                     if self.time_test:
                         for key, value in self.time_dict.items():
                             print(key, value/self.loop_counter)
+                    pygame.display.quit()
                     pygame.quit()
                     exit()
                 if event.type == KEYUP:

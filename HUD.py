@@ -1,6 +1,5 @@
 import pygame
 from pygame.locals import *
-
 import Sword as S
 import Items
 
@@ -67,24 +66,50 @@ class Bar:
 
 
 class Menu:
-    def __init__(self):
+    def __init__(self, left_boundary, background_image):
 
         self.menu_up = False
         self.index_clicked = None
 
+        self.left_boundary = left_boundary
+
+        ability_background = pygame.image.load(background_image)
+        self.menu_background_image = pygame.transform.smoothscale(ability_background, [370, 120])
+
+        self.menu_background_rect = Rect(left_boundary-10, 630, 370, 115)
+        self.menu_up_background_image = pygame.transform.smoothscale(ability_background, [370, 285])
+        self.menu_up_background_rect = (left_boundary-10, 350, 370, 285)
+
         # Make numbers for ability hotkeys.
         self.font = pygame.font.Font(None, 22)
-
 
         text = ["Sft", "Spc", "Ml", "Mr"]
         self.hotkey_texts = [self.font.render(text[i], True, (100, 200, 200)) for i in range(4)]
 
+        # Generate a dictionary, keys 0-15, with each value being a Rect, or a location.
+        # Shape is as follows.
+        #
+        # 12  13  14  15
+        # 8   9   10  11
+        # 4   5   6   7
+        # 0   1   2   3
+        # Only the bottom row is usually visible, but self.menu_up means the rest will show.
+        self.positions = {}
+        self.rows = 4
+        self.columns = 4
+        for i in range(self.rows):
+            for j in range(self.columns):
+                self.positions[j + (i*4)] = Rect([left_boundary + (j*90), 650 - (i*90), 80, 80])
 
     def active_image_clicked(self, click_pos: tuple):
         for index in range(4):
             if self.positions[index].collidepoint(click_pos):
                 self.index_clicked = index
                 return (True, index)
+
+    def draw(self, screen, ability_levels):
+        self._paint_ability_info(screen, ability_levels)
+        self._draw_abilities(screen)
 
     def menu_ability_clicked(self, click_pos: tuple):
         for index in range(4, len(self.positions)):
@@ -95,13 +120,13 @@ class Menu:
     def _change_element(self, index):
         self.elements[self.index_clicked] = self.elements[index]
 
-    def _paint_ability_info(self, screen, ability_levels, detail_position):
+    def _paint_ability_info(self, screen, ability_levels):
         # Highlight scrolled over picture in menu and paint their details above.
         iterate_part = 4 if not self.menu_up else len(self.positions)
         for index in range(iterate_part):
             if self.positions[index].collidepoint(pygame.mouse.get_pos()):
-                self._draw_ability_details(screen, index, ability_levels, detail_position)
-                pygame.draw.rect(screen, (0, 200, 200), self.positions[index])
+                self._draw_ability_details(screen, index, ability_levels)
+                pygame.draw.rect(screen, (0, 200, 200), self.positions[index]) # highlights the ability
 
     def _draw_abilities(self, screen):
         screen.blit(self.menu_background_image, self.menu_background_rect)
@@ -118,11 +143,8 @@ class Menu:
         if weapon is not None:
             screen.blit(self.element_images[weapon], ability_rect)
 
-    def _draw_ability_details(self, screen, index, ability_levels, area_from: str):
-        if area_from == "ability manager":
-            position = Rect(30, 225 + ((self.rows - 1) * 100), 300, 50) if not self.menu_up else Rect(30, 235, 300, 50)
-        elif area_from == "inventory":
-            position = Rect(880, 135 + ((self.rows - 1) * 100), 300, 50) if not self.menu_up else Rect(880, 165, 300, 50)
+    def _draw_ability_details(self, screen, index, ability_levels):
+        position = Rect(self.left_boundary-10, 225 + ((self.rows - 1) * 100), 300, 50) if not self.menu_up else Rect(self.left_boundary-10, 235, 300, 50)
 
         highlighted_element = self.elements[index]
 
@@ -137,36 +159,18 @@ class Menu:
             pass
 
 class Inventory(Menu):
-    def __init__(self):
-        Menu.__init__(self)
-
-        left_side_x = 880
+    def __init__(self, left_boundary):
+        Menu.__init__(self, left_boundary, "Other Art/Ability_Background.png")
 
         self.element_to_move = None
         self.ready_to_swap = False
 
-        ability_background = pygame.image.load('Other Art/Ability_Background.png')
-        self.menu_background_image = pygame.transform.smoothscale(ability_background, [370, 115])
-        self.menu_background_rect = Rect(left_side_x, 640, 370, 115)
+        #ability_background = pygame.image.load('Other Art/Ability_Background.png')
+        #self.menu_background_image = pygame.transform.smoothscale(ability_background, [370, 115])
+        #self.menu_background_rect = Rect(left_boundary-10, 630, 370, 115)
 
-        self.menu_up_background_image = pygame.transform.smoothscale(ability_background, [370, 360])
-        self.menu_up_background_rect = (left_side_x, 280, 370, 360)
-
-        # Generate a dictionary, keys 0-15, with each value being a Rect, or a location.
-        # Shape is as follows.
-        # 16  17  18  19
-        # 12  13  14  15
-        # 8   9   10  11
-        # 4   5   6   7
-        # 0   1   2   3
-        # Only the bottom row is usually visible, but self.menu_up means the rest will show.
-
-        self.positions = {}
-        self.rows = 5
-        self.columns = 4
-        for i in range(self.rows):
-            for j in range(self.columns):
-                self.positions[j + (i*4)] = Rect([left_side_x + (j*90) + 10, 650 - (i*90), 80, 80])
+        #self.menu_up_background_image = pygame.transform.smoothscale(ability_background, [370, 360])
+        #self.menu_up_background_rect = (left_boundary, 280, 370, 360)
 
         self.ability = None # Remove this soon.
 
@@ -199,10 +203,7 @@ class Inventory(Menu):
 
     def draw(self, screen, ability_levels):
         self._highlight_element_to_move(screen)
-
-        self._paint_ability_info(screen, ability_levels, "inventory")
-
-        self._draw_abilities(screen)
+        Menu.draw(self, screen, ability_levels)
 
     def _highlight_element_to_move(self, screen):
         if self.element_to_move is not None and self.menu_up:
@@ -249,15 +250,15 @@ class Inventory(Menu):
                     self.menu_up = not self.menu_up
 
 class AbilityManager(Menu):
-    def __init__(self):
-        Menu.__init__(self)
+    def __init__(self, left_boundary):
+        Menu.__init__(self, left_boundary, "Other Art/Ability_Background.png")
 
-        ability_background = pygame.image.load('Other Art/Ability_Background.png')
-        self.menu_background_image = pygame.transform.smoothscale(ability_background, [370, 115])
-        self.menu_background_rect = Rect(30, 640, 370, 115)
+        #ability_background = pygame.image.load('Other Art/Ability_Background.png')
+        #self.menu_background_image = pygame.transform.smoothscale(ability_background, [370, 115])
+        #self.menu_background_rect = Rect(30, 640, 370, 115)
 
-        self.menu_up_background_image = pygame.transform.smoothscale(self.menu_background_image, [370, 300])
-        self.menu_up_background_rect = (30, 350, 370, 300)
+        #self.menu_up_background_image = pygame.transform.smoothscale(self.menu_background_image, [370, 300])
+        #self.menu_up_background_rect = (left_boundary-10, 350, 370, 300)
 
         load_and_scale = lambda x: pygame.transform.smoothscale(pygame.image.load(x), [80, 80])
 
@@ -291,29 +292,11 @@ class AbilityManager(Menu):
                                 6: S.Arrow, 7: S.SplitShot, 8: S.Lightning, 9: S.FireStorm, 10: S.ToughenUp,
                                 11: S.Wisen, 12: None, 13: None, 14: None, 15: None}
 
-        # Generate a dictionary, keys 0-15, with each value being a Rect, or a location.
-        # Shape is as follows.
-        #
-        # 12  13  14  15
-        # 8   9   10  11
-        # 4   5   6   7
-        # 0   1   2   3
-        # Only the bottom row is usually visible, but self.menu_up means the rest will show.
-
-        self.positions = {}
-        self.rows = 4
-        self.columns = 4
-        for i in range(self.rows):
-            for j in range(self.columns):
-                self.positions[j + (i*4)] = Rect([40 + (j*90), 650 - (i*90), 80, 80])
-
 
     def draw(self, screen, ability_levels):
         self._grey_out(screen, ability_levels)
 
-        self._paint_ability_info(screen, ability_levels, "ability manager")
-
-        self._draw_abilities(screen)
+        Menu.draw(self, screen, ability_levels)
 
         self._draw_hotkey_details(screen, ability_levels)
 
@@ -327,7 +310,6 @@ class AbilityManager(Menu):
         for index in range(iterate_part):
             if self.elements[index] and ability_levels[self.elements[index]] == 0:
                 pygame.draw.rect(screen, (180, 75, 75), self.positions[index], 0)
-
 
     def _draw_hotkey_details(self, screen, ability_levels):
 

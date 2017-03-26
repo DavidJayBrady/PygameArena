@@ -17,8 +17,11 @@ class Character(Mover):
         self.ability_levels = {S.Attack: 1, S.Sweep: 0, S.Arrow: 0, S.SplitShot: 0, S.Lightning: 0,
                                S.FireStorm: 0, S.ToughenUp: 0, S.Wisen: 0}
 
-        self.ability_manager = AbilityManager()
-        self.inventory = Inventory()
+        left_ability_boundary = 40
+        self.ability_manager = AbilityManager(40)
+
+        left_inventory_boundary = 880
+        self.inventory = Inventory(left_inventory_boundary)
 
         self.from_player = True
 
