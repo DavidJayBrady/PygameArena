@@ -165,41 +165,18 @@ class Inventory(Menu):
         self.element_to_move = None
         self.ready_to_swap = False
 
-        #ability_background = pygame.image.load('Other Art/Ability_Background.png')
-        #self.menu_background_image = pygame.transform.smoothscale(ability_background, [370, 115])
-        #self.menu_background_rect = Rect(left_boundary-10, 630, 370, 115)
-
-        #self.menu_up_background_image = pygame.transform.smoothscale(ability_background, [370, 360])
-        #self.menu_up_background_rect = (left_boundary, 280, 370, 360)
-
-        self.ability = None # Remove this soon.
+        self.ability = None
 
         self.elements = {0: None, 1: None, 2: None, 3: None, 4: None, 5: None,
-                                6: None, 7: None, 8: S.ToughenUp, 9: None, 10: None,
+                                6: None, 7: None, 8: None, 9: None, 10: None,
                                 11: Items.Armor, 12: None, 13: None, 14: None, 15: None,
-                                16: None, 17: None, 18: None, 19: S.Lightning}
+                                16: None, 17: None, 18: None, 19: None}
 
-        ### The following images are here for testing inventory behavior. ###
         load_and_scale = lambda x: pygame.transform.smoothscale(pygame.image.load(x), [80, 80])
-
-        toughen_image = load_and_scale('Other Art/ToughenUp.png')
-        attack_image = load_and_scale('Other Art/Sword_Ability.png')
-        sweep_image = load_and_scale('Other Art/Sweep_Ability.png')
-        arrow_image = load_and_scale('Other Art/BowArrow.png')
-        splitshot_image = load_and_scale('Other Art/Splitshot.png')
-        lightning_image = load_and_scale('Other Art/Lightning.jpg')
-        lightning_image.set_colorkey((0, 0 ,0))
-        firestorm_image = load_and_scale('Other Art/Fireball.png')
-        firestorm_image.set_colorkey((0, 0 , 0))
-
         # This image just doesn't fit the theme well.
         armor_image = load_and_scale("Items/Light_Armor_Leather.png")
 
-        self.element_images = {S.ToughenUp: toughen_image, S.Attack: attack_image,
-                               S.Sweep: sweep_image, S.Arrow: arrow_image,
-                               S.SplitShot: splitshot_image, S.Lightning: lightning_image,
-                               S.FireStorm: firestorm_image, Items.Armor: armor_image}
-        ### End
+        self.element_images = {Items.Armor: armor_image}
 
     def draw(self, screen, ability_levels):
         self._highlight_element_to_move(screen)
@@ -208,7 +185,6 @@ class Inventory(Menu):
     def _highlight_element_to_move(self, screen):
         if self.element_to_move is not None and self.menu_up:
             pygame.draw.rect(screen, (100, 200, 100), self.positions[self.element_to_move], 0)
-
 
     # The following 2 methods prevent Attribute errors from calling a method on None.
     def _call_safe_enter(self, index, ability_levels):
@@ -222,6 +198,9 @@ class Inventory(Menu):
             self.elements[index].on_active_leave(ability_levels)
         except AttributeError:
             pass
+
+    def _draw_item_details(self, screen, ability_levels):
+        pass
 
     def handle_click(self, event, ability_levels):
         if event.button == LEFT:
@@ -252,13 +231,6 @@ class Inventory(Menu):
 class AbilityManager(Menu):
     def __init__(self, left_boundary):
         Menu.__init__(self, left_boundary, "Other Art/Ability_Background.png")
-
-        #ability_background = pygame.image.load('Other Art/Ability_Background.png')
-        #self.menu_background_image = pygame.transform.smoothscale(ability_background, [370, 115])
-        #self.menu_background_rect = Rect(30, 640, 370, 115)
-
-        #self.menu_up_background_image = pygame.transform.smoothscale(self.menu_background_image, [370, 300])
-        #self.menu_up_background_rect = (left_boundary-10, 350, 370, 300)
 
         load_and_scale = lambda x: pygame.transform.smoothscale(pygame.image.load(x), [80, 80])
 
@@ -291,7 +263,6 @@ class AbilityManager(Menu):
         self.elements = {0: S.Attack, 1: S.Sweep, 2: S.Arrow, 3: S.SplitShot, 4: S.Attack, 5: S.Sweep,
                                 6: S.Arrow, 7: S.SplitShot, 8: S.Lightning, 9: S.FireStorm, 10: S.ToughenUp,
                                 11: S.Wisen, 12: None, 13: None, 14: None, 15: None}
-
 
     def draw(self, screen, ability_levels):
         self._grey_out(screen, ability_levels)
